@@ -314,7 +314,6 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
     <div class="price-row">
       <button class="price-btn" id="pb-30" onclick="selectPrice(30)">฿30</button>
       <button class="price-btn" id="pb-35" onclick="selectPrice(35)">฿35</button>
-      <button class="price-btn" id="pb-40" onclick="selectPrice(40)">฿40</button>
       <div class="price-custom">
         <input type="number" id="priceCustom" placeholder="อื่นๆ" min="1" oninput="selectPrice(parseInt(this.value)||0)" onfocus="clearPreset()">
         <span>บาท</span>
@@ -349,7 +348,7 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 </div>
 
 <div class="done-bar" id="doneBar" style="display:none">
-  <button class="btn-done" id="btnDone" onclick="showReport()" disabled>ดูรายงานสรุป →</button>
+  <button class="btn-done" id="btnDone" onclick="showReport()" disabled>🗺️ ดูMAP</button>
 </div>
 
 <!-- Report Modal -->
@@ -365,7 +364,7 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
     <div class="map-box">
       <div class="map-header">
         <span class="map-title">แผนที่เส้นทาง</span>
-        <button class="btn-gmap" onclick="openFullMap()">Google Maps ↗</button>
+        <button class="btn-gmap" onclick="openFullMap()">🧭 นำทางทั้งสาย ↗</button>
       </div>
       <div class="map-frame" id="mapFrame"><div class="map-placeholder">🗺️<span>ไม่มีข้อมูลพิกัด</span></div></div>
     </div>
@@ -522,7 +521,7 @@ function captureGPS(){
 function setGps(state,text){const r=document.getElementById('gpsRow');r.className='gps-row'+(state!=='idle'?' '+state:'');document.getElementById('gpsText').textContent=text;}
 
 // ── Price ──
-function selectPrice(p){price=p||0;document.querySelectorAll('.price-btn').forEach(b=>b.classList.remove('sel'));if(p===30)document.getElementById('pb-30').classList.add('sel');else if(p===35)document.getElementById('pb-35').classList.add('sel');else if(p===40)document.getElementById('pb-40').classList.add('sel');updateCalc();}
+function selectPrice(p){price=p||0;document.querySelectorAll('.price-btn').forEach(b=>b.classList.remove('sel'));if(p===30)document.getElementById('pb-30').classList.add('sel');else if(p===35)document.getElementById('pb-35').classList.add('sel');updateCalc();}
 function clearPreset(){document.querySelectorAll('.price-btn').forEach(b=>b.classList.remove('sel'));}
 
 // ── Bonus ──
@@ -632,7 +631,8 @@ function buildOSMEmbed(){
   const wg=shops.filter(s=>s.gps);if(!wg.length)return null;
   const markers=wg.map(s=>{
     const detail=ICE.filter(ic=>s.ice&&s.ice[ic.k]).map(ic=>`${ic.icon} ${ic.label} × ${s.ice[ic.k]} ถุง`).join('<br>');
-    const popup=`<div style="font-family:sans-serif;min-width:150px;line-height:1.6"><b>#${s.num} ${s.name}</b><br><span style="font-size:12px;color:#555">${detail}</span><br><b style="color:#e67e00">฿${s.totalMoney.toLocaleString()}</b><br><a href="https://www.google.com/maps/dir/?api=1&destination=${s.gps.lat},${s.gps.lng}&travelmode=driving" target="_blank" style="font-size:11px;color:#0066cc">🧭 นำทาง</a></div>`.replace(/`/g,'\\`').replace(/\$/g,'\\$');
+    const photoHtml=s.photo?`<img src="${s.photo}" style="width:100%;height:90px;object-fit:cover;border-radius:6px;margin-bottom:6px;display:block;">`:'';
+    const popup=`<div style="font-family:sans-serif;min-width:160px;line-height:1.6;padding:2px">${photoHtml}<b style="font-size:13px">#${s.num} ${s.name}</b><br><span style="font-size:11px;color:#555">${detail}</span><br><b style="color:#e67e00;font-size:12px">฿${s.totalMoney.toLocaleString()}</b><br><a href="https://www.google.com/maps/dir/?api=1&destination=${s.gps.lat},${s.gps.lng}&travelmode=driving" target="_blank" style="display:inline-block;margin-top:5px;padding:3px 10px;background:#1a1a1a;color:#fff;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none">🧭 นำทาง</a></div>`.replace(/`/g,'\\`').replace(/\$/g,'\\$');
     return {lat:s.gps.lat,lng:s.gps.lng,popup,num:s.num};
   });
   const cLat=markers.reduce((a,m)=>a+m.lat,0)/markers.length,cLng=markers.reduce((a,m)=>a+m.lng,0)/markers.length;
