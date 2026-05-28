@@ -233,8 +233,8 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 
 <!-- Main App -->
 <header id="mainHeader" style="display:none">
-  <div class="hdr-brand">🧊 สุรินทร์น้ำทิพย์</div>
-  <span class="hdr-route" id="routeBadge" onclick="changeRoute()">–</span>
+  <button onclick="changeRoute()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;padding:4px;color:#555;line-height:1;">←</button>
+  <div class="hdr-brand" style="font-size:.95rem">🧊 <span id="routeBadge" style="font-weight:700">–</span></div>
   <span class="hdr-count" id="hdrCount">0 ร้าน</span>
 </header>
 <div id="syncBar" style="display:none"></div>
@@ -351,72 +351,62 @@ let sel={},photoData=null,shops=[],price=0,hasBonus=true,gps=null,currentRoute='
 const d=new Date();
 function today(){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 
-// ── Routes stored in localStorage ──
-function loadRoutes(){
-  const saved=localStorage.getItem('routes');
-  if(saved) return JSON.parse(saved);
-  const def=Array.from({length:26},(_,i)=>({id:i+1,name:`สาย ${i+1}`}));
-  saveRoutes(def); return def;
-}
-function saveRoutes(routes){localStorage.setItem('routes',JSON.stringify(routes));}
-
 document.getElementById('rsDate').textContent=d.toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 
 async function initRouteList(){
-  const routes=loadRoutes();
-  const rows=await sbGet('shops',`route_date=eq.${today()}&select=route_name`).catch(()=>[]);
-  const cnt={};rows.forEach(r=>{if(r.route_name)cnt[r.route_name]=(cnt[r.route_name]||0)+1;});
+  document.getElementById('routeList').innerHTML='<div style="padding:20px;text-align:center;color:#aaa;font-size:.85rem">กำลังโหลด...</div>';
+  const [routes,shopRows]=await Promise.all([
+    sbGet('routes','order=sort_order.asc,id.asc'),
+    sbGet('shops',`route_date=eq.${today()}&select=route_name`).catch(()=>[])
+  ]);
+  const cnt={};shopRows.forEach(r=>{if(r.route_name)cnt[r.route_name]=(cnt[r.route_name]||0)+1;});
   renderRouteList(routes,cnt);
 }
 initRouteList();
 
 function renderRouteList(routes,cnt={}){
-  document.getElementById('routeList').innerHTML=routes.map(r=>`
+  if(!routes.length){document.getElementById('routeList').innerHTML='<div style="padding:20px;text-align:center;color:#aaa;font-size:.85rem">ยังไม่มีสาย กด "+ เพิ่มสาย"</div>';return;}
+  document.getElementById('routeList').innerHTML=routes.map((r,i)=>`
     <div class="route-item" id="ri-${r.id}">
-      <span class="route-num">${r.id}</span>
-      <span class="route-name-text" onclick="startEditRoute(${r.id})" title="แตะเพื่อแก้ชื่อ">${r.name}</span>
+      <span class="route-num">${i+1}</span>
+      <span class="route-name-text" onclick="startEditRoute(${r.id},'${r.name.replace(/'/g,"\\'")}')" title="แตะเพื่อแก้ชื่อ">${r.name}</span>
       <span class="route-cnt ${cnt[r.name]?'has':''}">${cnt[r.name]?cnt[r.name]+' ร้าน':'ยังว่าง'}</span>
       <button class="btn-go" onclick="selectRoute('${r.name.replace(/'/g,"\\'")}')">เลือก →</button>
-      <button class="btn-del-route" onclick="deleteRoute(${r.id})" title="ลบสาย">✕</button>
+      <button class="btn-del-route" onclick="deleteRoute(${r.id},'${r.name.replace(/'/g,"\\'")}')" title="ลบสาย">✕</button>
     </div>`).join('');
 }
 
-function startEditRoute(id){
-  const routes=loadRoutes();
-  const r=routes.find(x=>x.id===id);
+function startEditRoute(id,oldName){
   const item=document.getElementById('ri-'+id);
   const nameEl=item.querySelector('.route-name-text');
   const input=document.createElement('input');
   input.className='route-name-input';
-  input.value=r.name;
-  input.onblur=()=>finishEditRoute(id,input.value);
-  input.onkeydown=e=>{if(e.key==='Enter')input.blur();if(e.key==='Escape'){input.value=r.name;input.blur();}};
+  input.value=oldName;
+  input.onblur=()=>finishEditRoute(id,input.value,oldName);
+  input.onkeydown=e=>{if(e.key==='Enter')input.blur();if(e.key==='Escape'){input.value=oldName;input.blur();}};
   nameEl.replaceWith(input);
   input.focus();input.select();
 }
 
-function finishEditRoute(id,newName){
+async function finishEditRoute(id,newName,oldName){
   const name=newName.trim();
-  if(!name)return initRouteList();
-  const routes=loadRoutes();
-  const r=routes.find(x=>x.id===id);
-  r.name=name;saveRoutes(routes);initRouteList();
+  if(!name||name===oldName)return initRouteList();
+  await fetch(`${SUPA_URL}/rest/v1/routes?id=eq.${id}`,{method:'PATCH',headers:H,body:JSON.stringify({name})});
+  initRouteList();
 }
 
-function addRoute(){
-  const routes=loadRoutes();
-  const nextId=routes.length?Math.max(...routes.map(r=>r.id))+1:1;
-  routes.push({id:nextId,name:`สาย ${nextId}`});
-  saveRoutes(routes);initRouteList();
-  // auto focus the new one
-  setTimeout(()=>startEditRoute(nextId),100);
+async function addRoute(){
+  const routes=await sbGet('routes','order=sort_order.asc,id.asc');
+  const nextOrder=routes.length?Math.max(...routes.map(r=>r.sort_order||0))+1:1;
+  const res=await fetch(`${SUPA_URL}/rest/v1/routes`,{method:'POST',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify({name:`สาย ใหม่`,sort_order:nextOrder})});
+  const rows=await res.json();
+  await initRouteList();
+  if(rows[0])setTimeout(()=>startEditRoute(rows[0].id,rows[0].name),100);
 }
 
-function deleteRoute(id){
-  const routes=loadRoutes();
-  const r=routes.find(x=>x.id===id);
-  if(!confirm(`ลบ "${r.name}"?`))return;
-  saveRoutes(routes.filter(x=>x.id!==id));
+async function deleteRoute(id,name){
+  if(!confirm(`ลบ "${name}"?`))return;
+  await sbDelete('routes',`id=eq.${id}`);
   initRouteList();
 }
 
