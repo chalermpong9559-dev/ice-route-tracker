@@ -10,20 +10,26 @@
 body{background:#f5f5f5;color:#1a1a1a;font-family:'Sarabun',sans-serif;min-height:100vh;}
 
 /* ── Route Screen ── */
-#routeScreen{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:48px 16px 40px;background:#fff;}
-.rs-brand{display:flex;align-items:center;gap:12px;margin-bottom:32px;}
+#routeScreen{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 16px 60px;background:#fff;}
+.rs-brand{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
 .rs-brand span{font-size:1.6rem;font-weight:700;color:#1a1a1a;}
-.rs-prompt{font-size:.9rem;color:#888;margin-bottom:24px;}
-.route-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;width:100%;max-width:480px;margin-bottom:20px;}
-.route-btn{background:#fff;border:1.5px solid #e5e5e5;border-radius:12px;padding:14px 8px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;position:relative;}
-.route-btn:hover{border-color:#1a1a1a;background:#fafafa;}
-.route-btn .rn{font-size:1.3rem;font-weight:700;color:#1a1a1a;}
-.route-btn .rl{font-size:.65rem;color:#999;margin-top:2px;}
-.route-btn .rc{position:absolute;top:-6px;right:-6px;background:#1a1a1a;color:#fff;font-size:.6rem;font-weight:700;border-radius:10px;padding:2px 6px;}
-.rs-custom{display:flex;gap:8px;width:100%;max-width:480px;}
-.rs-custom input{flex:1;border:1.5px solid #e5e5e5;border-radius:10px;padding:11px 14px;font-family:'Sarabun',sans-serif;font-size:.9rem;outline:none;background:#fff;}
-.rs-custom input:focus{border-color:#1a1a1a;}
-.rs-custom button{background:#1a1a1a;color:#fff;border:none;border-radius:10px;padding:11px 20px;font-family:'Sarabun',sans-serif;font-weight:600;cursor:pointer;white-space:nowrap;}
+.rs-date{font-size:.85rem;color:#aaa;margin-bottom:28px;}
+.rs-section{width:100%;max-width:480px;}
+.rs-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.rs-label{font-size:.75rem;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.5px;}
+.btn-add-route{display:flex;align-items:center;gap:5px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:'Sarabun',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;}
+.route-list{display:flex;flex-direction:column;gap:6px;width:100%;max-width:480px;}
+.route-item{display:flex;align-items:center;gap:10px;border:1.5px solid #e5e5e5;border-radius:12px;padding:12px 14px;background:#fff;transition:border-color .15s;}
+.route-item:hover{border-color:#bbb;}
+.route-num{font-size:1rem;font-weight:800;color:#1a1a1a;min-width:28px;}
+.route-name-text{flex:1;font-size:.95rem;font-weight:500;cursor:pointer;}
+.route-name-input{flex:1;border:none;outline:none;font-family:'Sarabun',sans-serif;font-size:.95rem;font-weight:500;background:transparent;color:#1a1a1a;}
+.route-cnt{font-size:.7rem;font-weight:600;background:#f0f0f0;border-radius:10px;padding:2px 8px;color:#888;white-space:nowrap;}
+.route-cnt.has{background:#1a1a1a;color:#fff;}
+.btn-go{background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:'Sarabun',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+.btn-go:hover{opacity:.8;}
+.btn-del-route{background:none;border:none;color:#ddd;font-size:1rem;cursor:pointer;padding:4px;transition:color .15s;flex-shrink:0;}
+.btn-del-route:hover{color:#ef4444;}
 
 /* ── Header ── */
 header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;}
@@ -215,11 +221,13 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 <!-- Route Screen -->
 <div id="routeScreen">
   <div class="rs-brand"><span>🧊</span><span>สุรินทร์น้ำทิพย์</span></div>
-  <div class="rs-prompt" id="rsDate"></div>
-  <div class="route-grid" id="routeGrid"></div>
-  <div class="rs-custom">
-    <input class="field-input" style="margin:0" type="text" id="routeCustomName" placeholder="สายอื่น (ระบุเอง)...">
-    <button onclick="selectCustomRoute()">เลือก</button>
+  <div class="rs-date" id="rsDate"></div>
+  <div class="rs-section">
+    <div class="rs-header">
+      <span class="rs-label">เลือกสายวันนี้</span>
+      <button class="btn-add-route" onclick="addRoute()">+ เพิ่มสาย</button>
+    </div>
+    <div class="route-list" id="routeList"></div>
   </div>
 </div>
 
@@ -335,7 +343,6 @@ const ICE=[
   {k:'cc',icon:'🌨️',label:'บดหยาบ'},
   {k:'cf',icon:'❄️',label:'บดละเอียด'},
 ];
-const ROUTES=['สาย 1','สาย 2','สาย 3','สาย 4','สาย 5','สาย 6','สาย 7','สาย 8','สาย 9','สาย 10','สาย 11','สาย 12','สาย 13','สาย 14','สาย 15','สาย 16','สาย 17','สาย 18','สาย 19','สาย 20','สาย 21','สาย 22','สาย 23','สาย 24','สาย 25','สาย 26'];
 const SUPA_URL='https://nosawlvjtaiumhnbjfsk.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vc2F3bHZqdGFpdW1obmJqZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MjU3MjEsImV4cCI6MjA5NTQwMTcyMX0.2nr-zdDTP9PqmvWflsfd5RA_8IsUm61mJxlTHDIJhKU';
 const H={'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY};
@@ -344,21 +351,76 @@ let sel={},photoData=null,shops=[],price=0,hasBonus=true,gps=null,currentRoute='
 const d=new Date();
 function today(){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 
-// ── Route screen ──
+// ── Routes stored in localStorage ──
+function loadRoutes(){
+  const saved=localStorage.getItem('routes');
+  if(saved) return JSON.parse(saved);
+  const def=Array.from({length:26},(_,i)=>({id:i+1,name:`สาย ${i+1}`}));
+  saveRoutes(def); return def;
+}
+function saveRoutes(routes){localStorage.setItem('routes',JSON.stringify(routes));}
+
 document.getElementById('rsDate').textContent=d.toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-(async function initRouteGrid(){
+
+async function initRouteList(){
+  const routes=loadRoutes();
   const rows=await sbGet('shops',`route_date=eq.${today()}&select=route_name`).catch(()=>[]);
   const cnt={};rows.forEach(r=>{if(r.route_name)cnt[r.route_name]=(cnt[r.route_name]||0)+1;});
-  document.getElementById('routeGrid').innerHTML=ROUTES.map(n=>`
-    <div class="route-btn" onclick="selectRoute('${n}')">
-      <div class="rn">${n.replace('สาย ','')}</div>
-      <div class="rl">${n}</div>
-      ${cnt[n]?`<div class="rc">${cnt[n]}</div>`:''}
+  renderRouteList(routes,cnt);
+}
+initRouteList();
+
+function renderRouteList(routes,cnt={}){
+  document.getElementById('routeList').innerHTML=routes.map(r=>`
+    <div class="route-item" id="ri-${r.id}">
+      <span class="route-num">${r.id}</span>
+      <span class="route-name-text" onclick="startEditRoute(${r.id})" title="แตะเพื่อแก้ชื่อ">${r.name}</span>
+      <span class="route-cnt ${cnt[r.name]?'has':''}">${cnt[r.name]?cnt[r.name]+' ร้าน':'ยังว่าง'}</span>
+      <button class="btn-go" onclick="selectRoute('${r.name.replace(/'/g,"\\'")}')">เลือก →</button>
+      <button class="btn-del-route" onclick="deleteRoute(${r.id})" title="ลบสาย">✕</button>
     </div>`).join('');
-})();
+}
+
+function startEditRoute(id){
+  const routes=loadRoutes();
+  const r=routes.find(x=>x.id===id);
+  const item=document.getElementById('ri-'+id);
+  const nameEl=item.querySelector('.route-name-text');
+  const input=document.createElement('input');
+  input.className='route-name-input';
+  input.value=r.name;
+  input.onblur=()=>finishEditRoute(id,input.value);
+  input.onkeydown=e=>{if(e.key==='Enter')input.blur();if(e.key==='Escape'){input.value=r.name;input.blur();}};
+  nameEl.replaceWith(input);
+  input.focus();input.select();
+}
+
+function finishEditRoute(id,newName){
+  const name=newName.trim();
+  if(!name)return initRouteList();
+  const routes=loadRoutes();
+  const r=routes.find(x=>x.id===id);
+  r.name=name;saveRoutes(routes);initRouteList();
+}
+
+function addRoute(){
+  const routes=loadRoutes();
+  const nextId=routes.length?Math.max(...routes.map(r=>r.id))+1:1;
+  routes.push({id:nextId,name:`สาย ${nextId}`});
+  saveRoutes(routes);initRouteList();
+  // auto focus the new one
+  setTimeout(()=>startEditRoute(nextId),100);
+}
+
+function deleteRoute(id){
+  const routes=loadRoutes();
+  const r=routes.find(x=>x.id===id);
+  if(!confirm(`ลบ "${r.name}"?`))return;
+  saveRoutes(routes.filter(x=>x.id!==id));
+  initRouteList();
+}
 
 function selectRoute(n){currentRoute=n;showMain();}
-function selectCustomRoute(){const v=document.getElementById('routeCustomName').value.trim();if(!v){alert('ระบุชื่อสาย');return;}currentRoute=v;showMain();}
 function changeRoute(){
   shops=[];
   document.getElementById('routeScreen').style.display='flex';
@@ -366,6 +428,7 @@ function changeRoute(){
   document.getElementById('syncBar').style.display='none';
   document.getElementById('mainContent').style.display='none';
   document.getElementById('doneBar').style.display='none';
+  initRouteList();
 }
 function showMain(){
   document.getElementById('routeScreen').style.display='none';
