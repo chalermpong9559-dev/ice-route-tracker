@@ -87,75 +87,76 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 .card-title{font-size:.85rem;font-weight:600;color:#888;margin-bottom:16px;text-transform:uppercase;letter-spacing:.5px;}
 
 /* ── Photo ── */
-.photo-zone{border:1.5px dashed #ddd;border-radius:12px;padding:24px;text-align:center;cursor:pointer;position:relative;overflow:hidden;margin-bottom:14px;transition:border-color .15s;}
+.photo-zone{border:1.5px dashed #ddd;border-radius:14px;min-height:90px;text-align:center;cursor:pointer;position:relative;overflow:hidden;margin-bottom:16px;transition:border-color .15s;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;padding:20px;}
 .photo-zone:hover{border-color:#aaa;}
 .photo-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;}
-.photo-zone .pz-icon{font-size:1.8rem;margin-bottom:6px;}
-.photo-zone p{font-size:.8rem;color:#aaa;}
-.photo-zone img{max-height:160px;max-width:100%;border-radius:8px;object-fit:cover;}
+.photo-zone .pz-icon{font-size:2rem;}
+.photo-zone p{font-size:.82rem;color:#aaa;}
+.photo-zone img{max-height:180px;max-width:100%;border-radius:10px;object-fit:cover;}
 .photo-hint{font-size:.7rem;color:#bbb;margin-top:4px;}
 
 /* ── Fields ── */
-.field-label{display:block;font-size:.78rem;font-weight:600;color:#666;margin-bottom:6px;}
-.field-input{width:100%;border:1.5px solid #e5e5e5;border-radius:10px;padding:10px 12px;font-family:'Sarabun',sans-serif;font-size:.95rem;outline:none;background:#fff;margin-bottom:14px;}
+.field-label{display:block;font-size:.8rem;font-weight:700;color:#555;margin-bottom:8px;}
+.field-input{width:100%;border:1.5px solid #e5e5e5;border-radius:12px;padding:13px 14px;font-family:'Sarabun',sans-serif;font-size:1rem;outline:none;background:#fff;margin-bottom:16px;}
 .field-input:focus{border-color:#1a1a1a;}
 .field-input::placeholder{color:#ccc;}
 
 /* ── GPS ── */
-.gps-row{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;border:1.5px solid #e5e5e5;margin-bottom:14px;font-size:.78rem;}
+.gps-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;border:1.5px solid #e5e5e5;margin-bottom:16px;}
 .gps-row.ok{border-color:#22c55e;background:#f0fdf4;}
 .gps-row.err{border-color:#ef4444;background:#fef2f2;}
 .gps-row.loading{border-color:#f59e0b;background:#fffbeb;}
-.gps-dot{width:7px;height:7px;border-radius:50%;background:#ccc;flex-shrink:0;}
+.gps-dot{width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0;}
 .gps-row.ok .gps-dot{background:#22c55e;}
 .gps-row.err .gps-dot{background:#ef4444;}
 .gps-row.loading .gps-dot{background:#f59e0b;animation:pulse 1s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.gps-text{flex:1;color:#666;}
+.gps-text{flex:1;font-size:.82rem;color:#888;}
 .gps-row.ok .gps-text{color:#16a34a;}
 .gps-row.err .gps-text{color:#dc2626;}
-.gps-btn{background:#1a1a1a;color:#fff;border:none;border-radius:7px;padding:4px 10px;font-size:.72rem;font-weight:600;cursor:pointer;font-family:'Sarabun',sans-serif;white-space:nowrap;}
+.gps-btn{background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:'Sarabun',sans-serif;white-space:nowrap;}
 
 /* ── Price ── */
-.price-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
-.price-btn{border:1.5px solid #e5e5e5;border-radius:8px;background:#fff;color:#555;font-family:'Sarabun',sans-serif;font-size:.9rem;font-weight:600;padding:8px 14px;cursor:pointer;transition:all .15s;}
-.price-btn:hover{border-color:#1a1a1a;}
+.price-row{display:flex;gap:8px;margin-bottom:16px;align-items:center;}
+.price-btn{flex:1;border:1.5px solid #e5e5e5;border-radius:12px;background:#fff;color:#555;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;padding:12px 0;cursor:pointer;transition:all .15s;text-align:center;}
 .price-btn.sel{background:#1a1a1a;border-color:#1a1a1a;color:#fff;}
-.price-custom{display:flex;align-items:center;gap:6px;flex:1;min-width:90px;}
-.price-custom input{width:70px;height:36px;text-align:center;border:1.5px solid #e5e5e5;border-radius:8px;font-size:.9rem;font-weight:600;outline:none;padding:0 6px;-moz-appearance:textfield;}
+.price-custom{display:flex;align-items:center;gap:6px;flex:1.2;}
+.price-custom input{flex:1;height:46px;text-align:center;border:1.5px solid #e5e5e5;border-radius:12px;font-size:1rem;font-weight:700;font-family:'Sarabun',sans-serif;outline:none;padding:0 8px;-moz-appearance:textfield;min-width:0;}
 .price-custom input::-webkit-inner-spin-button,.price-custom input::-webkit-outer-spin-button{-webkit-appearance:none;}
 .price-custom input:focus{border-color:#1a1a1a;}
-.price-custom span{font-size:.8rem;color:#aaa;}
+.price-custom span{font-size:.82rem;color:#aaa;white-space:nowrap;}
 
 /* ── Ice types ── */
-.ice-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
-.ice-item{display:flex;align-items:center;gap:10px;border:1.5px solid #e5e5e5;border-radius:10px;padding:10px 12px;cursor:pointer;transition:all .15s;}
-.ice-item:hover{border-color:#aaa;}
-.ice-item.sel{border-color:#1a1a1a;background:#f9f9f9;}
-.ice-item .ico{font-size:1.2rem;flex-shrink:0;}
-.ice-item .lbl{flex:1;font-size:.9rem;font-weight:500;}
-.ice-qty{display:flex;align-items:center;gap:5px;opacity:0;pointer-events:none;}
-.ice-item.sel .ice-qty{opacity:1;pointer-events:all;}
-.ice-qty input{width:50px;height:32px;text-align:center;border:1.5px solid #e5e5e5;border-radius:7px;font-size:.95rem;font-weight:600;outline:none;-moz-appearance:textfield;}
-.ice-qty input::-webkit-inner-spin-button,.ice-qty input::-webkit-outer-spin-button{-webkit-appearance:none;}
-.ice-qty input:focus{border-color:#1a1a1a;}
-.ice-qty span{font-size:.72rem;color:#aaa;}
+.ice-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.ice-item{display:flex;align-items:center;gap:12px;border:1.5px solid #e5e5e5;border-radius:12px;padding:12px 14px;transition:all .15s;background:#fff;}
+.ice-item.sel{border-color:#1a1a1a;background:#fafafa;}
+.ice-item .ico{font-size:1.4rem;flex-shrink:0;}
+.ice-item .lbl{flex:1;font-size:.95rem;font-weight:600;color:#333;}
+.ice-stepper{display:flex;align-items:center;gap:0;}
+.btn-step{width:36px;height:36px;border:1.5px solid #e5e5e5;background:#fff;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;color:#555;flex-shrink:0;}
+.btn-step:first-child{border-radius:10px 0 0 10px;}
+.btn-step:last-child{border-radius:0 10px 10px 0;}
+.btn-step:hover{background:#f0f0f0;}
+.ice-item.sel .btn-step{border-color:#1a1a1a;}
+.step-val{width:44px;height:36px;text-align:center;border:1.5px solid #e5e5e5;border-left:none;border-right:none;font-size:1rem;font-weight:700;font-family:'Sarabun',sans-serif;outline:none;background:#fff;-moz-appearance:textfield;}
+.step-val::-webkit-inner-spin-button,.step-val::-webkit-outer-spin-button{-webkit-appearance:none;}
+.ice-item.sel .step-val{border-color:#1a1a1a;border-left:none;border-right:none;}
 
 /* ── Bonus toggle ── */
-.bonus-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid #e5e5e5;border-radius:10px;cursor:pointer;margin-bottom:14px;transition:border-color .15s;user-select:none;}
+.bonus-row{display:flex;align-items:center;gap:12px;padding:14px;border:1.5px solid #e5e5e5;border-radius:12px;cursor:pointer;margin-bottom:16px;transition:all .15s;user-select:none;}
 .bonus-row.on{border-color:#22c55e;background:#f0fdf4;}
-.bonus-lbl{flex:1;font-size:.88rem;font-weight:500;color:#666;}
+.bonus-lbl{flex:1;font-size:.95rem;font-weight:600;color:#555;}
 .bonus-row.on .bonus-lbl{color:#16a34a;}
-.toggle{width:38px;height:22px;background:#e5e5e5;border-radius:11px;position:relative;transition:background .2s;flex-shrink:0;}
+.toggle{width:44px;height:26px;background:#e5e5e5;border-radius:13px;position:relative;transition:background .2s;flex-shrink:0;}
 .bonus-row.on .toggle{background:#22c55e;}
-.toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
-.bonus-row.on .toggle::after{transform:translateX(16px);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.bonus-row.on .toggle::after{transform:translateX(18px);}
 
 /* ── Calc preview ── */
-.calc{background:#fafafa;border:1px solid #ebebeb;border-radius:10px;padding:10px 14px;margin-bottom:14px;display:none;}
+.calc{background:#fafafa;border:1px solid #ebebeb;border-radius:12px;padding:12px 16px;margin-bottom:16px;display:none;}
 .calc.show{display:block;}
-.calc-line{display:flex;justify-content:space-between;font-size:.8rem;color:#666;margin-bottom:3px;}
-.calc-total{display:flex;justify-content:space-between;font-weight:700;font-size:.95rem;margin-top:8px;padding-top:8px;border-top:1px solid #ebebeb;}
+.calc-line{display:flex;justify-content:space-between;font-size:.85rem;color:#666;margin-bottom:4px;}
+.calc-total{display:flex;justify-content:space-between;font-weight:800;font-size:1rem;margin-top:10px;padding-top:10px;border-top:1px solid #ebebeb;}
 
 /* ── Button ── */
 .btn-primary{width:100%;background:#1a1a1a;color:#fff;border:none;border-radius:10px;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;padding:13px;cursor:pointer;transition:opacity .15s;}
@@ -553,17 +554,27 @@ function bonus(qty,hb){return hb?Math.floor(qty/10):0;}
 // ── Ice UI ──
 function buildIceUI(){
   document.getElementById('iceList').innerHTML=ICE.map(ic=>`
-    <div class="ice-item" id="row-${ic.k}" onclick="toggleIce('${ic.k}')">
+    <div class="ice-item" id="row-${ic.k}">
       <span class="ico">${ic.icon}</span>
       <span class="lbl">${ic.label}</span>
-      <div class="ice-qty" onclick="event.stopPropagation()">
-        <input type="number" id="qv-${ic.k}" value="1" min="1" max="999" oninput="syncQty('${ic.k}')" onfocus="this.select()">
-        <span>ถุง</span>
+      <div class="ice-stepper">
+        <button class="btn-step" onclick="stepIce('${ic.k}',-1)">−</button>
+        <input class="step-val" type="number" id="qv-${ic.k}" value="0" min="0" max="999"
+          oninput="setIceQty('${ic.k}',parseInt(this.value)||0)" onfocus="this.select()">
+        <button class="btn-step" onclick="stepIce('${ic.k}',1)">+</button>
       </div>
     </div>`).join('');
 }
-function toggleIce(k){if(sel[k]!==undefined){delete sel[k];document.getElementById('row-'+k).classList.remove('sel');}else{sel[k]=Math.max(1,parseInt(document.getElementById('qv-'+k).value)||1);document.getElementById('row-'+k).classList.add('sel');setTimeout(()=>document.getElementById('qv-'+k).select(),50);}updateCalc();}
-function syncQty(k){const v=Math.max(1,parseInt(document.getElementById('qv-'+k).value)||1);if(sel[k]!==undefined)sel[k]=v;updateCalc();}
+function stepIce(k,d){
+  const inp=document.getElementById('qv-'+k);
+  const v=Math.max(0,(parseInt(inp.value)||0)+d);
+  inp.value=v;setIceQty(k,v);
+}
+function setIceQty(k,v){
+  if(v>0){sel[k]=v;document.getElementById('row-'+k).classList.add('sel');}
+  else{delete sel[k];document.getElementById('row-'+k).classList.remove('sel');}
+  updateCalc();
+}
 
 // ── Calc ──
 function updateCalc(){
@@ -580,8 +591,7 @@ async function addShop(){
   const name=document.getElementById('shopName').value.trim();
   if(!name){alert('ใส่ชื่อร้านด้วย');return;}
   if(!price){alert('เลือกราคาต่อถุงด้วย');return;}
-  ICE.forEach(ic=>{if(sel[ic.k]!==undefined)sel[ic.k]=Math.max(1,parseInt(document.getElementById('qv-'+ic.k).value)||1);});
-  if(!Object.keys(sel).length){alert('เลือกประเภทน้ำแข็งอย่างน้อย 1 อย่าง');return;}
+  if(!Object.keys(sel).length){alert('เลือกประเภทน้ำแข็งอย่างน้อย 1 อย่าง (กด + เพื่อเพิ่มจำนวน)');return;}
   let tQty=0,tBonus=0,tMoney=0;
   Object.entries(sel).forEach(([k,qty])=>{tQty+=qty;tBonus+=bonus(qty,hasBonus);tMoney+=qty*price;});
   const shop={id:Date.now(),num:shops.length+1,name,photo:photoData,ice:{...sel},price,hasBonus,totalQty:tQty,totalBonus:tBonus,totalMoney:tMoney,gps:gps?{...gps}:null,note:document.getElementById('shopNote').value.trim(),time:new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})};
@@ -605,7 +615,7 @@ function resetForm(){
   document.getElementById('priceCustom').value='';
   document.querySelectorAll('.price-btn').forEach(b=>b.classList.remove('sel'));
   photoData=null;sel={};price=0;hasBonus=true;gps=null;
-  ICE.forEach(ic=>{document.getElementById('row-'+ic.k).classList.remove('sel');document.getElementById('qv-'+ic.k).value='1';});
+  ICE.forEach(ic=>{document.getElementById('row-'+ic.k).classList.remove('sel');document.getElementById('qv-'+ic.k).value='0';});
   document.getElementById('calcBox').classList.remove('show');
   const br=document.getElementById('bonusRow');br.classList.add('on');document.getElementById('bonusLbl').textContent='มีแถม (ทุก 10 ถุง แถม 1)';
   setGps('idle','ยังไม่ได้จับพิกัด');
