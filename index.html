@@ -258,7 +258,8 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
       <span class="rs-label">เลือกสายวันนี้</span>
       <div style="display:flex;gap:8px;">
         <button class="btn-add-route" style="background:#f0f0f0;color:#555;" onclick="showHistory()">📋 ดูทุกสาย</button>
-        <button class="btn-add-route" onclick="addRoute()">+ เพิ่มสาย</button>
+        <button class="btn-add-route" style="background:#f0f0f0;color:#555;" id="btnEditMode" onclick="toggleEditMode()">✏️ แก้ไข</button>
+        <button class="btn-add-route" id="btnAddRoute" style="display:none" onclick="addRoute()">+ เพิ่มสาย</button>
       </div>
     </div>
     <div class="route-list" id="routeList"></div>
@@ -408,15 +409,36 @@ async function initRouteList(){
 }
 initRouteList();
 
+let editMode=false;
+
+function toggleEditMode(){
+  editMode=!editMode;
+  const btn=document.getElementById('btnEditMode');
+  const btnAdd=document.getElementById('btnAddRoute');
+  btn.style.background=editMode?'#1a1a1a':'#f0f0f0';
+  btn.style.color=editMode?'#fff':'#555';
+  btn.textContent=editMode?'✅ เสร็จ':'✏️ แก้ไข';
+  btnAdd.style.display=editMode?'flex':'none';
+  initRouteList();
+}
+
 function renderRouteList(routes,cnt={}){
-  if(!routes.length){document.getElementById('routeList').innerHTML='<div style="padding:20px;text-align:center;color:#aaa;font-size:.85rem">ยังไม่มีสาย กด "+ เพิ่มสาย"</div>';return;}
+  if(!routes.length){
+    document.getElementById('routeList').innerHTML=`<div style="padding:20px;text-align:center;color:#aaa;font-size:.85rem">${editMode?'กด "+ เพิ่มสาย" เพื่อเพิ่มสายแรก':'ยังไม่มีสาย กด "✏️ แก้ไข" แล้วเพิ่มสาย'}</div>`;
+    return;
+  }
   document.getElementById('routeList').innerHTML=routes.map((r,i)=>`
     <div class="route-item" id="ri-${r.id}">
       <span class="route-num">${i+1}</span>
-      <span class="route-name-text" onclick="startEditRoute(${r.id},'${r.name.replace(/'/g,"\\'")}')" title="แตะเพื่อแก้ชื่อ">${r.name}</span>
+      ${editMode
+        ? `<span class="route-name-text" onclick="startEditRoute(${r.id},'${r.name.replace(/'/g,"\\'")}')" style="text-decoration:underline dotted;color:#555">${r.name}</span>`
+        : `<span class="route-name-text">${r.name}</span>`
+      }
       <span class="route-cnt ${cnt[r.name]?'has':''}">${cnt[r.name]?cnt[r.name]+' ร้าน':'ยังว่าง'}</span>
-      <button class="btn-go" onclick="selectRoute('${r.name.replace(/'/g,"\\'")}')">เลือก →</button>
-      <button class="btn-del-route" onclick="deleteRoute(${r.id},'${r.name.replace(/'/g,"\\'")}')" title="ลบสาย">✕</button>
+      ${editMode
+        ? `<button class="btn-del-route" onclick="deleteRoute(${r.id},'${r.name.replace(/'/g,"\\'")}')">🗑️</button>`
+        : `<button class="btn-go" onclick="selectRoute('${r.name.replace(/'/g,"\\'")}')">เลือก →</button>`
+      }
     </div>`).join('');
 }
 
