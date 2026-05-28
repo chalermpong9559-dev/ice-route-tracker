@@ -730,6 +730,8 @@ async function loadHistory(){
   body.innerHTML=Object.entries(byRoute).map(([routeName,shops])=>{
     const totalMoney=shops.reduce((a,s)=>a+(s.total_money||0),0);
     const totalQty=shops.reduce((a,s)=>a+(s.total_qty||0),0);
+    const displayName=(!routeName||routeName==='null')?'ไม่มีชื่อสาย':routeName;
+    const uid=(routeName||'null').replace(/[^a-zA-Z0-9ก-๙]/g,'_');
     const shopItems=shops.map(s=>{
       const iceDetail=ICE.filter(ic=>s.ice&&s.ice[ic.k]).map(ic=>`${ic.icon}${s.ice[ic.k]}`).join(' ');
       return`<div class="hist-shop-item">
@@ -742,11 +744,13 @@ async function loadHistory(){
         <div class="hist-shop-money">฿${(s.total_money||0).toLocaleString()}</div>
       </div>`;
     }).join('');
-    const uid=routeName.replace(/\s/g,'_');
     return`<div class="hist-day">
-      <div class="hist-day-header" onclick="toggleHistDay('${uid}')">
-        <div class="hist-day-date">${routeName}</div>
-        <div class="hist-day-sum">${shops.length} ร้าน · ${totalQty} ถุง<br><b>฿${totalMoney.toLocaleString()}</b></div>
+      <div class="hist-day-header">
+        <div style="flex:1;cursor:pointer" onclick="toggleHistDay('${uid}')">${displayName}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="hist-day-sum" style="cursor:pointer" onclick="toggleHistDay('${uid}')">${shops.length} ร้าน · ${totalQty} ถุง<br><b>฿${totalMoney.toLocaleString()}</b></div>
+          <button onclick="openRouteFromHistory('${(routeName||'').replace(/'/g,"\\'")}')" style="background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-family:'Sarabun',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap">🗺️ ดูMAP</button>
+        </div>
       </div>
       <div class="hist-routes open" id="${uid}">${shopItems}</div>
     </div>`;
@@ -755,6 +759,12 @@ async function loadHistory(){
 
 function toggleHistDay(uid){
   document.getElementById(uid).classList.toggle('open');
+}
+
+function openRouteFromHistory(routeName){
+  currentRoute=routeName;
+  hideHistory();
+  showMain();
 }
 </script>
 </body>
