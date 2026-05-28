@@ -257,7 +257,7 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
     <div class="rs-header">
       <span class="rs-label">เลือกสายวันนี้</span>
       <div style="display:flex;gap:8px;">
-        <button class="btn-add-route" style="background:#f0f0f0;color:#555;" onclick="showHistory()">📋 ประวัติ</button>
+        <button class="btn-add-route" style="background:#f0f0f0;color:#555;" onclick="showHistory()">📋 ดูทุกสาย</button>
         <button class="btn-add-route" onclick="addRoute()">+ เพิ่มสาย</button>
       </div>
     </div>
@@ -269,7 +269,7 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 <div id="historyScreen">
   <div class="hist-header">
     <button onclick="hideHistory()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:#555;">←</button>
-    <div class="hist-title">ประวัติการบันทึก</div>
+    <div class="hist-title">ทุกสาย – ภาพรวม</div>
   </div>
   <div class="hist-body" id="histBody">
     <div style="padding:40px;text-align:center;color:#aaa;font-size:.85rem">กำลังโหลด...</div>
@@ -402,7 +402,7 @@ async function initRouteList(){
   document.getElementById('routeList').innerHTML='<div style="padding:20px;text-align:center;color:#aaa;font-size:.85rem">กำลังโหลด...</div>';
   const [routes,shopRows]=await Promise.all([
     sbGet('routes','order=sort_order.asc,id.asc'),
-    sbGet('shops',`route_date=eq.${today()}&select=route_name`).catch(()=>[])
+    sbGet('shops','select=route_name').catch(()=>[])
   ]);
   const cnt={};shopRows.forEach(r=>{if(r.route_name)cnt[r.route_name]=(cnt[r.route_name]||0)+1;});
   renderRouteList(routes,cnt);
@@ -489,12 +489,12 @@ async function uploadPhoto(id,b64){
 async function saveShop(shop){
   let photoUrl=null;
   if(shop.photo&&shop.photo.startsWith('data:')){setSync('↑ อัพโหลดรูป...');photoUrl=await uploadPhoto(shop.id,shop.photo);const i=shops.findIndex(s=>s.id===shop.id);if(i>=0)shops[i].photo=photoUrl;}
-  return sbUpsert('shops',[{id:shop.id,num:shop.num,name:shop.name,price:shop.price,has_bonus:shop.hasBonus,ice:shop.ice,total_qty:shop.totalQty,total_bonus:shop.totalBonus,total_money:shop.totalMoney,gps:shop.gps||null,note:shop.note,time:shop.time,route_date:today(),route_name:currentRoute,photo_url:photoUrl}]);
+  return sbUpsert('shops',[{id:shop.id,num:shop.num,name:shop.name,price:shop.price,has_bonus:shop.hasBonus,ice:shop.ice,total_qty:shop.totalQty,total_bonus:shop.totalBonus,total_money:shop.totalMoney,gps:shop.gps||null,note:shop.note,time:shop.time,route_name:currentRoute,photo_url:photoUrl}]);
 }
 
 async function loadData(){
   setSync('กำลังโหลด...');
-  const rows=await sbGet('shops',`route_date=eq.${today()}&route_name=eq.${encodeURIComponent(currentRoute)}&order=num.asc`);
+  const rows=await sbGet('shops',`route_name=eq.${encodeURIComponent(currentRoute)}&order=num.asc`);
   if(!rows.length){setSync('');return;}
   shops=rows.map(r=>({id:r.id,num:r.num,name:r.name,price:r.price,hasBonus:r.has_bonus,ice:r.ice,totalQty:r.total_qty,totalBonus:r.total_bonus,totalMoney:r.total_money,gps:r.gps,note:r.note,time:r.time,photo:r.photo_url||null}));
   renderList();updateStats();if(shops.length)document.getElementById('btnDone').disabled=false;
@@ -717,66 +717,44 @@ function hideHistory(){
 async function loadHistory(){
   const body=document.getElementById('histBody');
   body.innerHTML='<div style="padding:40px;text-align:center;color:#aaa;font-size:.85rem">กำลังโหลด...</div>';
-  const rows=await sbGet('shops','order=route_date.desc,route_name.asc,num.asc&select=*');
-  if(!rows.length){body.innerHTML='<div style="padding:40px;text-align:center;color:#aaa;font-size:.85rem">ยังไม่มีประวัติ</div>';return;}
+  const rows=await sbGet('shops','order=route_name.asc,num.asc&select=*');
+  if(!rows.length){body.innerHTML='<div style="padding:40px;text-align:center;color:#aaa;font-size:.85rem">ยังไม่มีข้อมูล</div>';return;}
 
-  // group by date
-  const byDate={};
+  // group by route
+  const byRoute={};
   rows.forEach(r=>{
-    if(!byDate[r.route_date])byDate[r.route_date]={};
-    if(!byDate[r.route_date][r.route_name])byDate[r.route_date][r.route_name]=[];
-    byDate[r.route_date][r.route_name].push(r);
+    if(!byRoute[r.route_name])byRoute[r.route_name]=[];
+    byRoute[r.route_name].push(r);
   });
 
-  body.innerHTML=Object.entries(byDate).map(([date,routeMap])=>{
-    const allShops=Object.values(routeMap).flat();
-    const totalMoney=allShops.reduce((a,s)=>a+(s.total_money||0),0);
-    const totalShops=allShops.length;
-    const routeCount=Object.keys(routeMap).length;
-    const dateObj=new Date(date+'T00:00:00');
-    const dateLabel=dateObj.toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
-
-    const routeRows=Object.entries(routeMap).map(([routeName,shops])=>{
-      const rMoney=shops.reduce((a,s)=>a+(s.total_money||0),0);
-      const rQty=shops.reduce((a,s)=>a+(s.total_qty||0),0);
-      const shopItems=shops.map(s=>{
-        const iceDetail=ICE.filter(ic=>s.ice&&s.ice[ic.k]).map(ic=>`${ic.icon}${s.ice[ic.k]}`).join(' ');
-        return`<div class="hist-shop-item">
-          <span class="hist-shop-num">#${s.num}</span>
-          ${s.photo_url?`<img class="hist-shop-thumb" src="${s.photo_url}">`:`<div class="hist-shop-thumb-empty">🏪</div>`}
-          <div class="hist-shop-info">
-            <div class="hist-shop-name">${s.name}</div>
-            <div class="hist-shop-detail">${iceDetail}${s.note?' · '+s.note:''}</div>
-          </div>
-          <div class="hist-shop-money">฿${(s.total_money||0).toLocaleString()}</div>
-        </div>`;
-      }).join('');
-      const uid=`${date}-${routeName}`.replace(/\s/g,'_');
-      return`<div class="hist-route-row" onclick="toggleHistDetail('${uid}')">
-        <span class="hist-route-name">${routeName}</span>
-        <div class="hist-route-info">${shops.length} ร้าน · ${rQty} ถุง · <b>฿${rMoney.toLocaleString()}</b></div>
-      </div>
-      <div class="hist-detail" id="hd-${uid}">${shopItems}</div>`;
+  body.innerHTML=Object.entries(byRoute).map(([routeName,shops])=>{
+    const totalMoney=shops.reduce((a,s)=>a+(s.total_money||0),0);
+    const totalQty=shops.reduce((a,s)=>a+(s.total_qty||0),0);
+    const shopItems=shops.map(s=>{
+      const iceDetail=ICE.filter(ic=>s.ice&&s.ice[ic.k]).map(ic=>`${ic.icon}${s.ice[ic.k]}`).join(' ');
+      return`<div class="hist-shop-item">
+        <span class="hist-shop-num">#${s.num}</span>
+        ${s.photo_url?`<img class="hist-shop-thumb" src="${s.photo_url}">`:`<div class="hist-shop-thumb-empty">🏪</div>`}
+        <div class="hist-shop-info">
+          <div class="hist-shop-name">${s.name}</div>
+          <div class="hist-shop-detail">${iceDetail}${s.note?' · '+s.note:''}</div>
+        </div>
+        <div class="hist-shop-money">฿${(s.total_money||0).toLocaleString()}</div>
+      </div>`;
     }).join('');
-
-    const uid=`day-${date}`;
+    const uid=routeName.replace(/\s/g,'_');
     return`<div class="hist-day">
       <div class="hist-day-header" onclick="toggleHistDay('${uid}')">
-        <div class="hist-day-date">${dateLabel}</div>
-        <div class="hist-day-sum">${routeCount} สาย · ${totalShops} ร้าน<br><b>฿${totalMoney.toLocaleString()}</b></div>
+        <div class="hist-day-date">${routeName}</div>
+        <div class="hist-day-sum">${shops.length} ร้าน · ${totalQty} ถุง<br><b>฿${totalMoney.toLocaleString()}</b></div>
       </div>
-      <div class="hist-routes" id="${uid}">${routeRows}</div>
+      <div class="hist-routes open" id="${uid}">${shopItems}</div>
     </div>`;
   }).join('');
 }
 
 function toggleHistDay(uid){
-  const el=document.getElementById(uid);
-  el.classList.toggle('open');
-}
-function toggleHistDetail(uid){
-  const el=document.getElementById('hd-'+uid);
-  el.classList.toggle('open');
+  document.getElementById(uid).classList.toggle('open');
 }
 </script>
 </body>
