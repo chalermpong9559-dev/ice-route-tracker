@@ -188,6 +188,16 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 .btn-del:hover{color:#ef4444;}
 .btn-nav{background:#f0f0f0;border:none;color:#555;border-radius:7px;padding:3px 9px;font-size:.68rem;font-weight:600;cursor:pointer;white-space:nowrap;}
 .btn-nav:hover{background:#e5e5e5;}
+.btn-edit{background:none;border:none;color:#ccc;font-size:.85rem;cursor:pointer;padding:4px;transition:color .15s;}
+.btn-edit:hover{color:#555;}
+
+/* ── Edit shop modal ── */
+#editModal .modal{max-height:92vh;}
+.edit-section{margin-bottom:16px;}
+.edit-section-title{font-size:.75rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.edit-ice-list{display:flex;flex-direction:column;gap:8px;}
+.edit-ice-item{display:flex;align-items:center;gap:12px;border:1.5px solid #e5e5e5;border-radius:12px;padding:10px 14px;background:#fff;transition:all .15s;}
+.edit-ice-item.sel{border-color:#1a1a1a;background:#fafafa;}
 
 /* ── Empty state ── */
 .empty{text-align:center;padding:40px 20px;color:#ccc;}
@@ -351,6 +361,51 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 
 <div class="done-bar" id="doneBar" style="display:none">
   <button class="btn-done" id="btnDone" onclick="showReport()" disabled>🗺️ ดูMAP</button>
+</div>
+
+<!-- Edit Shop Modal -->
+<div class="modal-overlay" id="editModal" style="display:none" onclick="if(event.target===this)closeEditModal()">
+  <div class="modal">
+    <div class="modal-title">✏️ แก้ไขข้อมูลร้าน</div>
+    <div class="modal-sub" id="editModalSub"></div>
+
+    <div class="edit-section">
+      <div class="edit-section-title">ชื่อร้าน</div>
+      <input class="field-input" type="text" id="editShopName" placeholder="ชื่อร้าน..." style="margin-bottom:0">
+    </div>
+
+    <div class="edit-section">
+      <div class="edit-section-title">ราคาต่อถุง</div>
+      <div class="price-row" style="margin-bottom:0">
+        <button class="price-btn" id="epb-30" onclick="editSelectPrice(30)">฿30</button>
+        <button class="price-btn" id="epb-35" onclick="editSelectPrice(35)">฿35</button>
+        <div class="price-custom">
+          <input type="number" id="editPriceCustom" placeholder="อื่นๆ" min="1" oninput="editSelectPrice(parseInt(this.value)||0)" onfocus="document.querySelectorAll('#editModal .price-btn').forEach(b=>b.classList.remove('sel'))">
+          <span>บาท</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="edit-section">
+      <div class="edit-section-title">ประเภทน้ำแข็ง</div>
+      <div class="edit-ice-list" id="editIceList"></div>
+    </div>
+
+    <div class="edit-section">
+      <div class="edit-section-title">หมายเหตุ</div>
+      <input class="field-input" type="text" id="editShopNote" placeholder="หมายเหตุ (ถ้ามี)..." style="margin-bottom:0">
+    </div>
+
+    <div class="calc" id="editCalcBox" style="margin-bottom:16px">
+      <div id="editCalcLines"></div>
+      <div class="calc-total"><span>ยอดรวม</span><span id="editCalcTotal">฿0</span></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="saveEditShop()">💾 บันทึกการแก้ไข</button>
+      <button class="btn-secondary" onclick="closeEditModal()">ยกเลิก</button>
+    </div>
+  </div>
 </div>
 
 <!-- Report Modal -->
@@ -643,6 +698,7 @@ function renderList(){
           ${s.note?`<div class="shop-note">💬 ${s.note}</div>`:''}
         </div>
         <div class="shop-actions">
+          <button class="btn-edit" onclick="openEditShop(${s.id})" title="แก้ไข">✏️</button>
           <button class="btn-del" onclick="deleteShop(${s.id})">✕</button>
           ${s.gps?`<button class="btn-nav" onclick="navTo(${s.gps.lat},${s.gps.lng})">นำทาง</button>`:''}
         </div>
@@ -732,6 +788,85 @@ function copyReport(){
   const lines=[`📋 ${currentRoute} – ${d.toLocaleDateString('th-TH')}`,`ร้าน ${shops.length} · ถุง ${shops.reduce((a,s)=>a+s.totalQty,0)} · แถม ${tB} · ฿${tM.toLocaleString()}`,`────────────`,...shops.map(s=>{const detail=ICE.filter(ic=>s.ice[ic.k]).map(ic=>`${ic.icon}${ic.label}×${s.ice[ic.k]}${bonus(s.ice[ic.k],s.hasBonus)?'(+แถม'+bonus(s.ice[ic.k],s.hasBonus)+')':''}`).join(' ');return`#${s.num} ${s.name} [${s.time}]\n  ${detail}\n  ฿${s.totalMoney.toLocaleString()}${s.gps?'\n  📍 https://maps.google.com/?q='+s.gps.lat+','+s.gps.lng:''}${s.note?'\n  💬'+s.note:''}`}),`────────────`];
   navigator.clipboard.writeText(lines.join('\n')).then(()=>showToast('คัดลอกแล้ว')).catch(()=>showToast('คัดลอกไม่ได้'));
 }
+
+// ── Edit shop ──
+let editingId=null,editSel={},editPrice=0;
+
+function openEditShop(id){
+  const s=shops.find(x=>x.id===id);if(!s)return;
+  editingId=id;editSel={...s.ice};editPrice=s.price;
+  document.getElementById('editModalSub').textContent=`#${String(s.num).padStart(2,'0')} ${s.name}`;
+  document.getElementById('editShopName').value=s.name;
+  document.getElementById('editShopNote').value=s.note||'';
+  // price
+  document.querySelectorAll('#editModal .price-btn').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('editPriceCustom').value='';
+  if(s.price===30)document.getElementById('epb-30').classList.add('sel');
+  else if(s.price===35)document.getElementById('epb-35').classList.add('sel');
+  else document.getElementById('editPriceCustom').value=s.price;
+  // ice steppers
+  document.getElementById('editIceList').innerHTML=ICE.map(ic=>`
+    <div class="edit-ice-item ${editSel[ic.k]?'sel':''}" id="erow-${ic.k}">
+      <span class="ico">${ic.icon}</span>
+      <span class="lbl">${ic.label}</span>
+      <div class="ice-stepper">
+        <button class="btn-step" onclick="editStepIce('${ic.k}',-1)">−</button>
+        <input class="step-val" type="number" id="eqv-${ic.k}" value="${editSel[ic.k]||0}" min="0" max="999"
+          oninput="editSetIceQty('${ic.k}',parseInt(this.value)||0)" onfocus="this.select()">
+        <button class="btn-step" onclick="editStepIce('${ic.k}',1)">+</button>
+      </div>
+    </div>`).join('');
+  updateEditCalc();
+  document.getElementById('editModal').style.display='flex';
+}
+
+function editSelectPrice(p){
+  editPrice=p||0;
+  document.querySelectorAll('#editModal .price-btn').forEach(b=>b.classList.remove('sel'));
+  if(p===30)document.getElementById('epb-30').classList.add('sel');
+  else if(p===35)document.getElementById('epb-35').classList.add('sel');
+  updateEditCalc();
+}
+
+function editStepIce(k,d){
+  const inp=document.getElementById('eqv-'+k);
+  const v=Math.max(0,(parseInt(inp.value)||0)+d);
+  inp.value=v;editSetIceQty(k,v);
+}
+function editSetIceQty(k,v){
+  if(v>0){editSel[k]=v;document.getElementById('erow-'+k).classList.add('sel');}
+  else{delete editSel[k];document.getElementById('erow-'+k).classList.remove('sel');}
+  updateEditCalc();
+}
+
+function updateEditCalc(){
+  const box=document.getElementById('editCalcBox');const keys=Object.keys(editSel);
+  if(!keys.length||!editPrice){box.classList.remove('show');return;}
+  box.classList.add('show');let total=0,lines='';
+  keys.forEach(k=>{const ic=ICE.find(i=>i.k===k),qty=editSel[k],b=bonus(qty,true),m=qty*editPrice;total+=m;
+    lines+=`<div class="calc-line"><span>${ic.icon} ${ic.label} ${qty}ถุง${b?` (+แถม ${b})`:''}</span><span>฿${m.toLocaleString()}</span></div>`;});
+  document.getElementById('editCalcLines').innerHTML=lines;
+  document.getElementById('editCalcTotal').textContent='฿'+total.toLocaleString();
+}
+
+async function saveEditShop(){
+  const name=document.getElementById('editShopName').value.trim();
+  if(!name){alert('ใส่ชื่อร้านด้วย');return;}
+  if(!editPrice){alert('เลือกราคาต่อถุงด้วย');return;}
+  if(!Object.keys(editSel).length){alert('เลือกประเภทน้ำแข็งอย่างน้อย 1 อย่าง');return;}
+  const note=document.getElementById('editShopNote').value.trim();
+  let tQty=0,tBonus=0,tMoney=0;
+  Object.entries(editSel).forEach(([k,qty])=>{tQty+=qty;tBonus+=bonus(qty,true);tMoney+=qty*editPrice;});
+  const i=shops.findIndex(s=>s.id===editingId);if(i<0)return;
+  shops[i]={...shops[i],name,price:editPrice,ice:{...editSel},hasBonus:true,totalQty:tQty,totalBonus:tBonus,totalMoney:tMoney,note};
+  renderList();updateStats();closeEditModal();
+  setSync('กำลังบันทึก...');
+  const ok=await fetch(`${SUPA_URL}/rest/v1/shops?id=eq.${editingId}`,{method:'PATCH',headers:H,body:JSON.stringify({name,price:editPrice,ice:editSel,has_bonus:true,total_qty:tQty,total_bonus:tBonus,total_money:tMoney,note})}).then(r=>r.ok);
+  setSync(ok?`แก้ไข "${name}" แล้ว`:'บันทึกไม่ได้');setTimeout(()=>setSync(''),2500);
+  showToast(`✏️ แก้ไข "${name}" แล้ว`);
+}
+
+function closeEditModal(){document.getElementById('editModal').style.display='none';editingId=null;}
 
 function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2200);}
 
