@@ -584,7 +584,10 @@ const H={'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Be
 
 let sel={},photoData=null,shops=[],price=0,hasBonus=true,gps=null,currentRoute='';
 const d=new Date();
-function today(){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+// ── Helpers ──
+function today(){const n=new Date();return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function nowDate(){return new Date().toLocaleDateString('th-TH');}
 
 document.getElementById('rsDate').textContent=d.toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 
@@ -617,19 +620,29 @@ function renderRouteList(routes,cnt={}){
     document.getElementById('routeList').innerHTML=`<div style="padding:20px;text-align:center;color:#aaa;font-size:.85rem">${editMode?'กด "+ เพิ่มสาย" เพื่อเพิ่มสายแรก':'ยังไม่มีสาย กด "✏️ แก้ไข" แล้วเพิ่มสาย'}</div>`;
     return;
   }
-  document.getElementById('routeList').innerHTML=routes.map((r,i)=>`
-    <div class="route-item" id="ri-${r.id}">
+  const list=document.getElementById('routeList');
+  list.innerHTML=routes.map((r,i)=>`
+    <div class="route-item" id="ri-${r.id}" data-route-id="${r.id}" data-route-name="${esc(r.name)}">
       <span class="route-num">${i+1}</span>
       ${editMode
-        ? `<span class="route-name-text" onclick="startEditRoute(${r.id},'${r.name.replace(/'/g,"\\'")}')" style="text-decoration:underline dotted;color:#555">${r.name}</span>`
-        : `<span class="route-name-text">${r.name}</span>`
+        ? `<span class="route-name-text" data-edit-route="${r.id}" style="text-decoration:underline dotted;color:#555">${esc(r.name)}</span>`
+        : `<span class="route-name-text">${esc(r.name)}</span>`
       }
       <span class="route-cnt ${cnt[r.name]?'has':''}">${cnt[r.name]?cnt[r.name]+' ร้าน':'ยังว่าง'}</span>
       ${editMode
-        ? `<button class="btn-del-route" onclick="deleteRoute(${r.id},'${r.name.replace(/'/g,"\\'")}')">🗑️</button>`
-        : `<button class="btn-go" onclick="selectRoute('${r.name.replace(/'/g,"\\'")}')">เลือก →</button>`
+        ? `<button class="btn-del-route" data-del-route="${r.id}">🗑️</button>`
+        : `<button class="btn-go" data-select-route="${esc(r.name)}">เลือก →</button>`
       }
     </div>`).join('');
+  // event delegation — ไม่มี onclick string ใน HTML
+  list.addEventListener('click',e=>{
+    const selBtn=e.target.closest('[data-select-route]');
+    if(selBtn){selectRoute(selBtn.dataset.selectRoute);return;}
+    const delBtn=e.target.closest('[data-del-route]');
+    if(delBtn){const item=delBtn.closest('[data-route-name]');deleteRoute(Number(delBtn.dataset.delRoute),item.dataset.routeName);return;}
+    const editSpan=e.target.closest('[data-edit-route]');
+    if(editSpan){const item=editSpan.closest('[data-route-name]');startEditRoute(Number(editSpan.dataset.editRoute),item.dataset.routeName);}
+  },{once:true});
 }
 
 function startEditRoute(id,oldName){
@@ -654,7 +667,7 @@ async function finishEditRoute(id,newName,oldName){
 async function addRoute(){
   const routes=await sbGet('routes','order=sort_order.asc,id.asc');
   const nextOrder=routes.length?Math.max(...routes.map(r=>r.sort_order||0))+1:1;
-  const res=await fetch(`${SUPA_URL}/rest/v1/routes`,{method:'POST',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify({name:`สาย ใหม่`,sort_order:nextOrder})});
+  const res=await fetch(`${SUPA_URL}/rest/v1/routes`,{method:'POST',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify({name:`สายใหม่ #${Date.now()}`,sort_order:nextOrder})});
   const rows=await res.json();
   await initRouteList();
   if(rows[0])setTimeout(()=>startEditRoute(rows[0].id,rows[0].name),100);
@@ -703,12 +716,15 @@ async function saveShop(shop){
   return sbUpsert('shops',[{id:shop.id,num:shop.num,name:shop.name,price:shop.price,has_bonus:shop.hasBonus,ice:shop.ice,total_qty:shop.totalQty,total_bonus:shop.totalBonus,total_money:shop.totalMoney,gps:shop.gps||null,note:shop.note,time:shop.time,route_name:currentRoute,photo_url:photoUrl}]);
 }
 
+let _loadSeq=0;
 async function loadData(){
+  const seq=++_loadSeq;
   setSync('กำลังโหลด...');
   const rows=await sbGet('shops',`route_name=eq.${encodeURIComponent(currentRoute)}&order=num.asc`);
+  if(seq!==_loadSeq)return; // stale — สลับสายไปแล้ว
   if(!rows.length){setSync('');return;}
   shops=rows.map(r=>({id:r.id,num:r.num,name:r.name,price:r.price,hasBonus:r.has_bonus,ice:r.ice,totalQty:r.total_qty,totalBonus:r.total_bonus,totalMoney:r.total_money,gps:r.gps,note:r.note,time:r.time,photo:r.photo_url||null}));
-  renderList();updateStats();if(shops.length)document.getElementById('btnDone').disabled=false;document.getElementById('btnDelivery').disabled=false;
+  renderList();updateStats();if(shops.length){document.getElementById('btnDone').disabled=false;document.getElementById('btnDelivery').disabled=false;}
   setSync(`โหลดแล้ว ${shops.length} ร้าน`);setTimeout(()=>setSync(''),2000);
 }
 
@@ -792,9 +808,17 @@ async function addShop(){
 
 async function deleteShop(id){
   if(!confirm('ลบร้านนี้?'))return;
-  shops=shops.filter(s=>s.id!==id);shops.forEach((s,i)=>s.num=i+1);
-  renderList();updateStats();document.getElementById('btnDone').disabled=!shops.length;document.getElementById('btnDelivery').disabled=!shops.length;
-  await deleteShopSupa(id);
+  setSync('กำลังลบ...');
+  const ok=await deleteShopSupa(id);
+  if(!ok){setSync('ลบไม่สำเร็จ');setTimeout(()=>setSync(''),2000);showToast('❌ ลบไม่ได้ กรุณาลองใหม่');return;}
+  shops=shops.filter(s=>s.id!==id);
+  shops.forEach((s,i)=>s.num=i+1);
+  renderList();updateStats();
+  document.getElementById('btnDone').disabled=!shops.length;
+  document.getElementById('btnDelivery').disabled=!shops.length;
+  setSync('ลบแล้ว');setTimeout(()=>setSync(''),1500);
+  // sync num กลับ Supabase (fire-and-forget)
+  shops.forEach(s=>fetch(`${SUPA_URL}/rest/v1/shops?id=eq.${s.id}`,{method:'PATCH',headers:H,body:JSON.stringify({num:s.num})}));
 }
 
 function resetForm(){
@@ -822,14 +846,14 @@ function renderList(){
   el.innerHTML=shops.map(s=>`
     <div class="shop-card">
       <div class="shop-inner">
-        ${s.photo?`<img class="shop-thumb" src="${s.photo}" onclick="viewPhotoUrl('${s.photo}','#${String(s.num).padStart(2,'0')} ${s.name}')">`:`<div class="shop-thumb-empty">🏪</div>`}
+        ${s.photo?`<img class="shop-thumb" src="${esc(s.photo)}" data-photo-url="${esc(s.photo)}" data-photo-label="${esc('#'+String(s.num).padStart(2,'0')+' '+s.name)}">`:`<div class="shop-thumb-empty">🏪</div>`}
         <div class="shop-info">
-          <div class="shop-meta">#${String(s.num).padStart(2,'0')} · ${s.time}</div>
-          <div class="shop-name">${s.name}</div>
+          <div class="shop-meta">#${String(s.num).padStart(2,'0')} · ${esc(s.time)}</div>
+          <div class="shop-name">${esc(s.name)}</div>
           <div class="shop-detail">${iceDetail(s.ice,s.price,s.hasBonus)}</div>
           <div class="shop-money">฿${s.totalMoney.toLocaleString()}${s.totalBonus?` · แถม ${s.totalBonus} ถุง`:''}${!s.hasBonus?' · ไม่มีแถม':''}</div>
           ${s.gps?`<div class="shop-gps">📍 ${s.gps.lat.toFixed(4)}, ${s.gps.lng.toFixed(4)}</div>`:''}
-          ${s.note?`<div class="shop-note">💬 ${s.note}</div>`:''}
+          ${s.note?`<div class="shop-note">💬 ${esc(s.note)}</div>`:''}
         </div>
         <div class="shop-actions">
           <button class="btn-edit" onclick="openEditShop(${s.id})" title="แก้ไข">✏️</button>
@@ -838,6 +862,8 @@ function renderList(){
         </div>
       </div>
     </div>`).join('');
+  // event delegation สำหรับรูป
+  el.querySelectorAll('[data-photo-url]').forEach(img=>img.addEventListener('click',()=>viewPhotoUrl(img.dataset.photoUrl,img.dataset.photoLabel)));
 }
 
 function updateStats(){
@@ -883,7 +909,7 @@ function openFullMap(){
 function showReport(){
   document.getElementById('reportModal').style.display='flex';
   const tMoney=shops.reduce((a,s)=>a+s.totalMoney,0),tBonus=shops.reduce((a,s)=>a+s.totalBonus,0),tQty=shops.reduce((a,s)=>a+s.totalQty,0);
-  document.getElementById('rptSub').textContent=`${currentRoute} · ${d.toLocaleDateString('th-TH')}`;
+  document.getElementById('rptSub').textContent=`${currentRoute} · ${nowDate()}`;
   document.getElementById('rptStats').innerHTML=`
     <div class="m-stat"><div class="v">${shops.length}</div><div class="l">ร้าน</div></div>
     <div class="m-stat"><div class="v">${tQty}</div><div class="l">ถุงรวม</div></div>
@@ -920,16 +946,16 @@ function exportCSV(){
 
 function copyReport(){
   const tM=shops.reduce((a,s)=>a+s.totalMoney,0),tB=shops.reduce((a,s)=>a+s.totalBonus,0);
-  const lines=[`📋 ${currentRoute} – ${d.toLocaleDateString('th-TH')}`,`ร้าน ${shops.length} · ถุง ${shops.reduce((a,s)=>a+s.totalQty,0)} · แถม ${tB} · ฿${tM.toLocaleString()}`,`────────────`,...shops.map(s=>{const detail=ICE.filter(ic=>s.ice[ic.k]).map(ic=>`${ic.icon}${ic.label}×${s.ice[ic.k]}${bonus(s.ice[ic.k],s.hasBonus)?'(+แถม'+bonus(s.ice[ic.k],s.hasBonus)+')':''}`).join(' ');return`#${s.num} ${s.name} [${s.time}]\n  ${detail}\n  ฿${s.totalMoney.toLocaleString()}${s.gps?'\n  📍 https://maps.google.com/?q='+s.gps.lat+','+s.gps.lng:''}${s.note?'\n  💬'+s.note:''}`}),`────────────`];
+  const lines=[`📋 ${currentRoute} – ${nowDate()}`,`ร้าน ${shops.length} · ถุง ${shops.reduce((a,s)=>a+s.totalQty,0)} · แถม ${tB} · ฿${tM.toLocaleString()}`,`────────────`,...shops.map(s=>{const detail=ICE.filter(ic=>s.ice[ic.k]).map(ic=>`${ic.icon}${ic.label}×${s.ice[ic.k]}${bonus(s.ice[ic.k],s.hasBonus)?'(+แถม'+bonus(s.ice[ic.k],s.hasBonus)+')':''}`).join(' ');return`#${s.num} ${s.name} [${s.time}]\n  ${detail}\n  ฿${s.totalMoney.toLocaleString()}${s.gps?'\n  📍 https://maps.google.com/?q='+s.gps.lat+','+s.gps.lng:''}${s.note?'\n  💬'+s.note:''}`}),`────────────`];
   navigator.clipboard.writeText(lines.join('\n')).then(()=>showToast('คัดลอกแล้ว')).catch(()=>showToast('คัดลอกไม่ได้'));
 }
 
 // ── Edit shop ──
-let editingId=null,editSel={},editPrice=0;
+let editingId=null,editSel={},editPrice=0,editHasBonus=true;
 
 function openEditShop(id){
   const s=shops.find(x=>x.id===id);if(!s)return;
-  editingId=id;editSel={...s.ice};editPrice=s.price;
+  editingId=id;editSel={...s.ice};editPrice=s.price;editHasBonus=s.hasBonus;
   document.getElementById('editModalSub').textContent=`#${String(s.num).padStart(2,'0')} ${s.name}`;
   document.getElementById('editShopName').value=s.name;
   document.getElementById('editShopNote').value=s.note||'';
@@ -978,7 +1004,7 @@ function updateEditCalc(){
   const box=document.getElementById('editCalcBox');const keys=Object.keys(editSel);
   if(!keys.length||!editPrice){box.classList.remove('show');return;}
   box.classList.add('show');let total=0,lines='';
-  keys.forEach(k=>{const ic=ICE.find(i=>i.k===k),qty=editSel[k],b=bonus(qty,true),m=qty*editPrice;total+=m;
+  keys.forEach(k=>{const ic=ICE.find(i=>i.k===k),qty=editSel[k],b=bonus(qty,editHasBonus),m=qty*editPrice;total+=m;
     lines+=`<div class="calc-line"><span>${ic.icon} ${ic.label} ${qty}ถุง${b?` (+แถม ${b})`:''}</span><span>฿${m.toLocaleString()}</span></div>`;});
   document.getElementById('editCalcLines').innerHTML=lines;
   document.getElementById('editCalcTotal').textContent='฿'+total.toLocaleString();
@@ -991,12 +1017,12 @@ async function saveEditShop(){
   if(!Object.keys(editSel).length){alert('เลือกประเภทน้ำแข็งอย่างน้อย 1 อย่าง');return;}
   const note=document.getElementById('editShopNote').value.trim();
   let tQty=0,tBonus=0,tMoney=0;
-  Object.entries(editSel).forEach(([k,qty])=>{tQty+=qty;tBonus+=bonus(qty,true);tMoney+=qty*editPrice;});
+  Object.entries(editSel).forEach(([k,qty])=>{tQty+=qty;tBonus+=bonus(qty,editHasBonus);tMoney+=qty*editPrice;});
   const i=shops.findIndex(s=>s.id===editingId);if(i<0)return;
-  shops[i]={...shops[i],name,price:editPrice,ice:{...editSel},hasBonus:true,totalQty:tQty,totalBonus:tBonus,totalMoney:tMoney,note};
+  shops[i]={...shops[i],name,price:editPrice,ice:{...editSel},hasBonus:editHasBonus,totalQty:tQty,totalBonus:tBonus,totalMoney:tMoney,note};
   renderList();updateStats();closeEditModal();
   setSync('กำลังบันทึก...');
-  const ok=await fetch(`${SUPA_URL}/rest/v1/shops?id=eq.${editingId}`,{method:'PATCH',headers:H,body:JSON.stringify({name,price:editPrice,ice:editSel,has_bonus:true,total_qty:tQty,total_bonus:tBonus,total_money:tMoney,note})}).then(r=>r.ok);
+  const ok=await fetch(`${SUPA_URL}/rest/v1/shops?id=eq.${editingId}`,{method:'PATCH',headers:H,body:JSON.stringify({name,price:editPrice,ice:editSel,has_bonus:editHasBonus,total_qty:tQty,total_bonus:tBonus,total_money:tMoney,note})}).then(r=>r.ok);
   setSync(ok?`แก้ไข "${name}" แล้ว`:'บันทึกไม่ได้');setTimeout(()=>setSync(''),2500);
   showToast(`✏️ แก้ไข "${name}" แล้ว`);
 }
@@ -1100,7 +1126,6 @@ function renderDlv(){
   if(done>=total){renderDlvFinish();return;}
 
   const s=shops[dlvIdx];
-  const bonus=(qty,hb)=>hb?Math.floor(qty/10):0;
   const iceRows=ICE.filter(ic=>s.ice&&s.ice[ic.k]).map(ic=>{
     const b=bonus(s.ice[ic.k],s.hasBonus);
     return`<div class="dlv-ice-row">
@@ -1199,7 +1224,7 @@ function dlvConfirmFinish(){
 }
 
 function dlvBackFromConfirm(){
-  // กลับไปจุดสุดท้ายที่ยังไม่ได้ส่ง
+  dlvIdx=Math.max(dlvIdx-1,0);
   renderDlv();
   document.getElementById('dlvBody').scrollTop=0;
 }
@@ -1243,11 +1268,15 @@ async function loadSbRoutes(){
   const cnt={};shopRows.forEach(r=>{if(r.route_name)cnt[r.route_name]=(cnt[r.route_name]||0)+1;});
   if(!routes.length){el.innerHTML='<div style="padding:20px;text-align:center;color:#aaa;font-size:.82rem">ยังไม่มีสาย</div>';return;}
   el.innerHTML=routes.map((r,i)=>`
-    <div class="sb-route-item ${currentRoute===r.name?'current':''}" onclick="sbSelectRoute('${r.name.replace(/'/g,"\\'")}')">
+    <div class="sb-route-item ${currentRoute===r.name?'current':''}" data-sb-route="${esc(r.name)}">
       <span class="sb-route-num">${i+1}</span>
-      <span class="sb-route-name">${r.name}</span>
+      <span class="sb-route-name">${esc(r.name)}</span>
       <span class="sb-route-cnt ${cnt[r.name]?'has':''}">${cnt[r.name]?cnt[r.name]+' ร้าน':'ว่าง'}</span>
     </div>`).join('');
+  el.addEventListener('click',e=>{
+    const item=e.target.closest('[data-sb-route]');
+    if(item)sbSelectRoute(item.dataset.sbRoute);
+  },{once:true});
 }
 
 function sbSelectRoute(name){
