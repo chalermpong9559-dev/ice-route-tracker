@@ -53,7 +53,7 @@ body{background:#f5f5f5;color:#1a1a1a;font-family:'Sarabun',sans-serif;min-heigh
 .hist-shop-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #ebebeb;}
 .hist-shop-item:last-child{border-bottom:none;}
 .hist-shop-num{font-size:.7rem;font-weight:700;color:#aaa;min-width:20px;}
-.hist-shop-thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid #ebebeb;flex-shrink:0;}
+.hist-shop-thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid #ebebeb;flex-shrink:0;cursor:pointer;}
 .hist-shop-thumb-empty{width:44px;height:44px;border-radius:8px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
 .hist-shop-info{flex:1;min-width:0;}
 .hist-shop-name{font-size:.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -172,7 +172,8 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 .shop-card{background:#fff;border:1px solid #ebebeb;border-radius:14px;margin-bottom:8px;overflow:hidden;animation:fadeUp .2s ease;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .shop-inner{display:flex;gap:12px;padding:12px;}
-.shop-thumb{width:64px;height:64px;flex-shrink:0;border-radius:10px;object-fit:cover;border:1px solid #ebebeb;}
+.shop-thumb{width:64px;height:64px;flex-shrink:0;border-radius:10px;object-fit:cover;border:1px solid #ebebeb;cursor:pointer;transition:opacity .15s;}
+.shop-thumb:active{opacity:.75;}
 .shop-thumb-empty{width:64px;height:64px;flex-shrink:0;border-radius:10px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:1.5rem;}
 .shop-info{flex:1;min-width:0;}
 .shop-meta{font-size:.65rem;color:#aaa;font-weight:600;margin-bottom:2px;}
@@ -755,7 +756,7 @@ function renderList(){
   el.innerHTML=shops.map(s=>`
     <div class="shop-card">
       <div class="shop-inner">
-        ${s.photo?`<img class="shop-thumb" src="${s.photo}">`:`<div class="shop-thumb-empty">🏪</div>`}
+        ${s.photo?`<img class="shop-thumb" src="${s.photo}" onclick="viewPhotoUrl('${s.photo}','#${String(s.num).padStart(2,'0')} ${s.name}')">`:`<div class="shop-thumb-empty">🏪</div>`}
         <div class="shop-info">
           <div class="shop-meta">#${String(s.num).padStart(2,'0')} · ${s.time}</div>
           <div class="shop-name">${s.name}</div>
@@ -839,7 +840,8 @@ function showReport(){
     </div>`).join('');
 }
 
-function viewPhoto(i){const s=shops[i];if(!s?.photo)return;const lb=document.createElement('div');lb.className='lightbox';lb.innerHTML=`<img src="${s.photo}"><div class="lightbox-name">#${s.num} ${s.name}</div><button class="lightbox-close" onclick="this.closest('.lightbox').remove()">✕ ปิด</button>`;lb.onclick=e=>{if(e.target===lb)lb.remove();};document.body.appendChild(lb);}
+function viewPhoto(i){const s=shops[i];if(!s?.photo)return;viewPhotoUrl(s.photo,`#${s.num} ${s.name}`);}
+function viewPhotoUrl(url,label){if(!url)return;const lb=document.createElement('div');lb.className='lightbox';lb.innerHTML=`<img src="${url}"><div class="lightbox-name">${label||''}</div><button class="lightbox-close" onclick="this.closest('.lightbox').remove()">✕ ปิด</button>`;lb.onclick=e=>{if(e.target===lb)lb.remove();};document.body.appendChild(lb);}
 function closeModal(){document.getElementById('reportModal').style.display='none';}
 
 function exportCSV(){
@@ -970,7 +972,7 @@ async function loadHistory(){
       const iceDetail=ICE.filter(ic=>s.ice&&s.ice[ic.k]).map(ic=>`${ic.icon}${s.ice[ic.k]}`).join(' ');
       return`<div class="hist-shop-item">
         <span class="hist-shop-num">#${s.num}</span>
-        ${s.photo_url?`<img class="hist-shop-thumb" src="${s.photo_url}">`:`<div class="hist-shop-thumb-empty">🏪</div>`}
+        ${s.photo_url?`<img class="hist-shop-thumb" src="${s.photo_url}" onclick="viewPhotoUrl('${s.photo_url}','#${s.num} ${s.name}')">`:`<div class="hist-shop-thumb-empty">🏪</div>`}
         <div class="hist-shop-info">
           <div class="hist-shop-name">${s.name}</div>
           <div class="hist-shop-detail">${iceDetail}${s.note?' · '+s.note:''}</div>
