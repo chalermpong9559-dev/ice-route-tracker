@@ -206,7 +206,7 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 .empty p{font-size:.85rem;}
 
 /* ── Done bar ── */
-.done-bar{position:fixed;bottom:0;left:0;right:0;padding:12px 16px 20px;background:linear-gradient(to top,#f5f5f5 60%,transparent);}
+.done-bar{position:fixed;bottom:0;left:0;right:0;padding:12px 16px 20px;background:linear-gradient(to top,#f5f5f5 60%,transparent);display:flex;gap:8px;}
 .btn-done{display:block;width:100%;max-width:480px;margin:0 auto;background:#1a1a1a;color:#fff;border:none;border-radius:12px;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;padding:14px;cursor:pointer;}
 .btn-done:disabled{background:#e5e5e5;color:#bbb;cursor:not-allowed;}
 
@@ -257,6 +257,53 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 /* ── Toast ── */
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:9px 18px;border-radius:20px;font-size:.82rem;font-weight:600;z-index:300;white-space:nowrap;animation:toastIn .2s ease;}
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* ── Delivery Mode ── */
+#deliveryScreen{position:fixed;inset:0;z-index:150;background:#f5f5f5;display:none;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+#deliveryScreen.open{display:flex;transform:translateX(0);}
+.dlv-header{background:#fff;border-bottom:1px solid #ebebeb;padding:12px 16px;display:flex;align-items:center;gap:10px;}
+.dlv-title{flex:1;font-size:.9rem;font-weight:700;}
+.dlv-close{background:none;border:none;font-size:1.1rem;color:#888;cursor:pointer;padding:4px;}
+.dlv-progress-wrap{background:#fff;padding:10px 16px 14px;border-bottom:1px solid #f0f0f0;}
+.dlv-progress-bar{height:8px;background:#f0f0f0;border-radius:99px;overflow:hidden;margin-bottom:6px;}
+.dlv-progress-fill{height:100%;background:linear-gradient(90deg,#3b82f6,#06b6d4);border-radius:99px;transition:width .4s cubic-bezier(.4,0,.2,1);}
+.dlv-progress-label{display:flex;justify-content:space-between;font-size:.75rem;color:#aaa;font-weight:600;}
+.dlv-progress-label span:last-child{color:#3b82f6;}
+.dlv-body{flex:1;overflow-y:auto;padding:16px 16px 0;}
+.dlv-card{background:#fff;border-radius:20px;box-shadow:0 2px 16px rgba(0,0,0,.07);padding:20px;margin-bottom:12px;}
+.dlv-stop-num{font-size:.72rem;font-weight:700;color:#3b82f6;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;}
+.dlv-shop-name{font-size:1.5rem;font-weight:800;color:#1a1a1a;margin-bottom:14px;line-height:1.2;}
+.dlv-photo{width:100%;height:160px;object-fit:cover;border-radius:12px;margin-bottom:14px;cursor:pointer;}
+.dlv-photo-empty{width:100%;height:100px;background:#f5f5f5;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:14px;}
+.dlv-ice-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.dlv-ice-row{display:flex;align-items:center;gap:10px;background:#f8faff;border-radius:12px;padding:10px 14px;}
+.dlv-ice-icon{font-size:1.3rem;}
+.dlv-ice-name{flex:1;font-size:.9rem;font-weight:600;color:#1a1a1a;}
+.dlv-ice-qty{font-size:1rem;font-weight:800;color:#1a1a1a;}
+.dlv-ice-bonus{font-size:.72rem;background:#dcfce7;color:#16a34a;border-radius:8px;padding:2px 7px;font-weight:700;}
+.dlv-money-row{display:flex;align-items:center;justify-content:space-between;background:#1a1a1a;color:#fff;border-radius:12px;padding:12px 16px;margin-bottom:6px;}
+.dlv-money-label{font-size:.8rem;color:#aaa;}
+.dlv-money-val{font-size:1.3rem;font-weight:800;}
+.dlv-note{font-size:.8rem;color:#888;background:#fffbeb;border-radius:10px;padding:8px 12px;margin-bottom:4px;}
+.dlv-footer{padding:12px 16px 24px;display:flex;flex-direction:column;gap:8px;background:#f5f5f5;}
+.btn-dlv-nav{background:#3b82f6;color:#fff;border:none;border-radius:14px;padding:16px;font-family:'Sarabun',sans-serif;font-size:1.05rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s;}
+.btn-dlv-nav:active{opacity:.8;}
+.dlv-row2{display:flex;gap:8px;}
+.btn-dlv-skip{flex:1;background:#fff;color:#888;border:1.5px solid #e5e5e5;border-radius:14px;padding:13px;font-family:'Sarabun',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;}
+.btn-dlv-next{flex:2;background:#1a1a1a;color:#fff;border:none;border-radius:14px;padding:13px;font-family:'Sarabun',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:opacity .15s;}
+.btn-dlv-next:active,.btn-dlv-skip:active{opacity:.75;}
+.btn-dlv-prev{background:#fff;color:#555;border:1.5px solid #e5e5e5;border-radius:14px;padding:13px 16px;font-family:'Sarabun',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;}
+/* Finish screen */
+.dlv-finish{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;text-align:center;gap:10px;}
+.dlv-finish-icon{font-size:4rem;animation:popIn .4s cubic-bezier(.34,1.56,.64,1);}
+@keyframes popIn{from{transform:scale(0)}to{transform:scale(1)}}
+.dlv-finish h2{font-size:1.5rem;font-weight:800;margin:0;}
+.dlv-finish p{font-size:.9rem;color:#666;margin:0;line-height:1.6;}
+.dlv-finish-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;margin:8px 0;}
+.dlv-finish-stat{background:#fff;border-radius:14px;padding:14px 8px;text-align:center;}
+.dlv-finish-stat .v{font-size:1.3rem;font-weight:800;}
+.dlv-finish-stat .l{font-size:.65rem;color:#aaa;margin-top:2px;}
+.dlv-skipped{font-size:.75rem;color:#f59e0b;background:#fffbeb;border-radius:8px;padding:4px 10px;display:inline-block;}
 
 /* ── Sidebar ── */
 #sidebarBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;opacity:0;pointer-events:none;transition:opacity .25s;}
@@ -428,7 +475,23 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 </div>
 
 <div class="done-bar" id="doneBar" style="display:none">
-  <button class="btn-done" id="btnDone" onclick="showReport()" disabled>🗺️ ดูMAP</button>
+  <button class="btn-done" id="btnDone" onclick="showReport()" disabled style="flex:1">🗺️ ดูMAP</button>
+  <button id="btnDelivery" onclick="startDelivery()" disabled style="flex:1;background:#3b82f6;color:#fff;border:none;border-radius:14px;padding:14px;font-family:'Sarabun',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;">🚚 วิ่งสาย</button>
+</div>
+
+<!-- Delivery Mode Screen -->
+<div id="deliveryScreen">
+  <div class="dlv-header">
+    <button class="dlv-close" onclick="closeDelivery()">←</button>
+    <div class="dlv-title" id="dlvTitle">วิ่งสาย</div>
+    <span id="dlvSkippedBadge"></span>
+  </div>
+  <div class="dlv-progress-wrap">
+    <div class="dlv-progress-bar"><div class="dlv-progress-fill" id="dlvFill" style="width:0%"></div></div>
+    <div class="dlv-progress-label"><span id="dlvProgLabel">จุดที่ 1</span><span id="dlvProgCount"></span></div>
+  </div>
+  <div class="dlv-body" id="dlvBody"></div>
+  <div class="dlv-footer" id="dlvFooter"></div>
 </div>
 
 <!-- Edit Shop Modal -->
@@ -642,7 +705,7 @@ async function loadData(){
   const rows=await sbGet('shops',`route_name=eq.${encodeURIComponent(currentRoute)}&order=num.asc`);
   if(!rows.length){setSync('');return;}
   shops=rows.map(r=>({id:r.id,num:r.num,name:r.name,price:r.price,hasBonus:r.has_bonus,ice:r.ice,totalQty:r.total_qty,totalBonus:r.total_bonus,totalMoney:r.total_money,gps:r.gps,note:r.note,time:r.time,photo:r.photo_url||null}));
-  renderList();updateStats();if(shops.length)document.getElementById('btnDone').disabled=false;
+  renderList();updateStats();if(shops.length)document.getElementById('btnDone').disabled=false;document.getElementById('btnDelivery').disabled=false;
   setSync(`โหลดแล้ว ${shops.length} ร้าน`);setTimeout(()=>setSync(''),2000);
 }
 
@@ -721,13 +784,13 @@ async function addShop(){
   shops.push(shop);renderList();updateStats();resetForm();
   setSync('กำลังบันทึก...');const ok=await saveShop(shop);
   setSync(ok?`บันทึก "${name}" แล้ว`:'บันทึกไม่ได้');setTimeout(()=>setSync(''),2500);
-  showToast(`เพิ่ม "${name}" แล้ว`);document.getElementById('btnDone').disabled=false;
+  showToast(`เพิ่ม "${name}" แล้ว`);document.getElementById('btnDone').disabled=false;document.getElementById('btnDelivery').disabled=false;
 }
 
 async function deleteShop(id){
   if(!confirm('ลบร้านนี้?'))return;
   shops=shops.filter(s=>s.id!==id);shops.forEach((s,i)=>s.num=i+1);
-  renderList();updateStats();document.getElementById('btnDone').disabled=!shops.length;
+  renderList();updateStats();document.getElementById('btnDone').disabled=!shops.length;document.getElementById('btnDelivery').disabled=!shops.length;
   await deleteShopSupa(id);
 }
 
@@ -1001,6 +1064,109 @@ function openRouteFromHistory(routeName){
   currentRoute=routeName;
   hideHistory();
   showMain();
+}
+
+// ── Delivery Mode ──
+let dlvIdx=0, dlvSkipped=new Set();
+
+function startDelivery(){
+  if(!shops.length){alert('ยังไม่มีร้านในสายนี้');return;}
+  dlvIdx=0; dlvSkipped=new Set();
+  document.getElementById('deliveryScreen').classList.add('open');
+  document.getElementById('deliveryScreen').style.display='flex';
+  renderDlv();
+}
+
+function closeDelivery(){
+  const s=document.getElementById('deliveryScreen');
+  s.style.transform='translateX(100%)';
+  setTimeout(()=>{s.classList.remove('open');s.style.display='none';s.style.transform='';},300);
+}
+
+function renderDlv(){
+  const total=shops.length;
+  const done=dlvIdx;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('dlvFill').style.width=pct+'%';
+  document.getElementById('dlvTitle').textContent=currentRoute+' – วิ่งสาย';
+  document.getElementById('dlvProgLabel').textContent=done>=total?'เสร็จแล้ว! 🎉':`จุดที่ ${done+1}`;
+  document.getElementById('dlvProgCount').textContent=`${done}/${total} จุด`;
+  const skip=dlvSkipped.size;
+  document.getElementById('dlvSkippedBadge').innerHTML=skip?`<span class="dlv-skipped">ข้าม ${skip}</span>`:'';
+
+  if(done>=total){renderDlvFinish();return;}
+
+  const s=shops[dlvIdx];
+  const bonus=(qty,hb)=>hb?Math.floor(qty/10):0;
+  const iceRows=ICE.filter(ic=>s.ice&&s.ice[ic.k]).map(ic=>{
+    const b=bonus(s.ice[ic.k],s.hasBonus);
+    return`<div class="dlv-ice-row">
+      <span class="dlv-ice-icon">${ic.icon}</span>
+      <span class="dlv-ice-name">${ic.label}</span>
+      <span class="dlv-ice-qty">${s.ice[ic.k]} ถุง</span>
+      ${b?`<span class="dlv-ice-bonus">+แถม ${b}</span>`:''}
+    </div>`;
+  }).join('');
+
+  document.getElementById('dlvBody').innerHTML=`
+    <div class="dlv-card">
+      <div class="dlv-stop-num">📍 จุดที่ ${dlvIdx+1} จาก ${total}</div>
+      <div class="dlv-shop-name">${s.name}</div>
+      ${s.photo?`<img class="dlv-photo" src="${s.photo}" onclick="viewPhotoUrl('${s.photo}','${s.name}')">`:`<div class="dlv-photo-empty">🏪</div>`}
+      <div class="dlv-ice-list">${iceRows}</div>
+      <div class="dlv-money-row">
+        <span class="dlv-money-label">ยอดรวม</span>
+        <span class="dlv-money-val">฿${s.totalMoney.toLocaleString()}</span>
+      </div>
+      ${s.note?`<div class="dlv-note">💬 ${s.note}</div>`:''}
+    </div>`;
+
+  document.getElementById('dlvFooter').innerHTML=`
+    ${s.gps?`<button class="btn-dlv-nav" onclick="navTo(${s.gps.lat},${s.gps.lng})">🧭 นำทางไปร้านนี้</button>`:''}
+    <div class="dlv-row2">
+      ${dlvIdx>0?`<button class="btn-dlv-prev" onclick="dlvPrev()">← ย้อน</button>`:''}
+      <button class="btn-dlv-skip" onclick="dlvSkip()">ข้าม</button>
+      <button class="btn-dlv-next" onclick="dlvNext()">ส่งแล้ว ✓ &nbsp;ต่อไป →</button>
+    </div>`;
+}
+
+function renderDlvFinish(){
+  const total=shops.length, skip=dlvSkipped.size, done=total-skip;
+  const tMoney=shops.filter((_,i)=>!dlvSkipped.has(i)).reduce((a,s)=>a+s.totalMoney,0);
+  const tQty=shops.filter((_,i)=>!dlvSkipped.has(i)).reduce((a,s)=>a+s.totalQty,0);
+  document.getElementById('dlvBody').innerHTML=`
+    <div class="dlv-finish">
+      <div class="dlv-finish-icon">🎉</div>
+      <h2>วิ่งสายเสร็จแล้ว!</h2>
+      <p>${currentRoute}<br>${new Date().toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long'})}</p>
+      <div class="dlv-finish-stats">
+        <div class="dlv-finish-stat"><div class="v">${done}</div><div class="l">ร้านที่ส่ง</div></div>
+        <div class="dlv-finish-stat"><div class="v">${tQty}</div><div class="l">ถุงรวม</div></div>
+        <div class="dlv-finish-stat money"><div class="v">${tMoney.toLocaleString()}</div><div class="l">บาท</div></div>
+      </div>
+      ${skip?`<div class="dlv-skipped">ข้าม ${skip} ร้าน</div>`:''}
+    </div>`;
+  document.getElementById('dlvFooter').innerHTML=`
+    <button class="btn-dlv-nav" onclick="closeDelivery();showReport()">🗺️ ดูสรุปทั้งสาย</button>
+    <button class="btn-dlv-skip" style="width:100%;margin-top:0" onclick="closeDelivery()">กลับหน้าหลัก</button>`;
+}
+
+function dlvNext(){
+  dlvIdx=Math.min(dlvIdx+1, shops.length);
+  renderDlv();
+  document.getElementById('dlvBody').scrollTop=0;
+}
+function dlvPrev(){
+  dlvIdx=Math.max(dlvIdx-1,0);
+  dlvSkipped.delete(dlvIdx);
+  renderDlv();
+  document.getElementById('dlvBody').scrollTop=0;
+}
+function dlvSkip(){
+  dlvSkipped.add(dlvIdx);
+  dlvIdx=Math.min(dlvIdx+1, shops.length);
+  renderDlv();
+  document.getElementById('dlvBody').scrollTop=0;
 }
 
 // ── Sidebar ──
