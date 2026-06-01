@@ -1155,7 +1155,51 @@ function renderDlvFinish(){
 }
 
 function dlvNext(){
-  dlvIdx=Math.min(dlvIdx+1, shops.length);
+  const nextIdx=dlvIdx+1;
+  // ถ้าจะจบสาย และมีร้านที่ข้าม → ถามยืนยันก่อน
+  if(nextIdx>=shops.length && dlvSkipped.size>0){
+    renderDlvConfirm();
+    return;
+  }
+  dlvIdx=Math.min(nextIdx, shops.length);
+  renderDlv();
+  document.getElementById('dlvBody').scrollTop=0;
+}
+
+function renderDlvConfirm(){
+  const skippedShops=shops.filter((_,i)=>dlvSkipped.has(i));
+  document.getElementById('dlvBody').innerHTML=`
+    <div class="dlv-card">
+      <div style="text-align:center;padding:8px 0 16px">
+        <div style="font-size:2.5rem">⚠️</div>
+        <div style="font-size:1.1rem;font-weight:800;margin:8px 0 4px">ยืนยันจบสาย?</div>
+        <div style="font-size:.85rem;color:#888">มีร้านที่ยังไม่ได้ส่ง ${skippedShops.length} ร้าน</div>
+      </div>
+      <div style="background:#fff7ed;border-radius:12px;padding:12px 14px;margin-bottom:4px">
+        <div style="font-size:.75rem;font-weight:700;color:#f59e0b;margin-bottom:8px">🏪 ร้านที่ข้าม</div>
+        ${skippedShops.map(s=>`
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #fef3c7">
+            <span style="font-size:.75rem;color:#aaa;min-width:20px">#${s.num}</span>
+            <span style="flex:1;font-size:.88rem;font-weight:600">${s.name}</span>
+            <span style="font-size:.78rem;font-weight:700;color:#f59e0b">฿${s.totalMoney.toLocaleString()}</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  document.getElementById('dlvFooter').innerHTML=`
+    <button class="btn-dlv-next" onclick="dlvConfirmFinish()" style="background:#16a34a">✅ ยืนยัน จบสายเลย</button>
+    <div class="dlv-row2">
+      <button class="btn-dlv-skip" onclick="dlvBackFromConfirm()" style="flex:1;background:#f0f0f0;color:#555;border-color:#e5e5e5">← กลับไปแก้</button>
+    </div>`;
+  document.getElementById('dlvBody').scrollTop=0;
+}
+
+function dlvConfirmFinish(){
+  dlvIdx=shops.length;
+  renderDlvFinish();
+}
+
+function dlvBackFromConfirm(){
+  // กลับไปจุดสุดท้ายที่ยังไม่ได้ส่ง
   renderDlv();
   document.getElementById('dlvBody').scrollTop=0;
 }
