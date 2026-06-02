@@ -267,6 +267,15 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 .dl-tab{flex:1;padding:11px 0;font-size:.82rem;font-weight:700;color:#aaa;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:'Sarabun',sans-serif;}
 .dl-tab.active{color:#1a1a1a;border-bottom-color:#1a1a1a;}
 .dl-body{flex:1;overflow-y:auto;padding:16px 16px 40px;}
+.dl-body-inner{max-width:560px;margin:0 auto;}
+@media(min-width:640px){
+  .dl-body{padding:20px 24px 40px;}
+  .dl-section{padding:14px 16px;}
+  .dl-2col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .dl-3col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+  .dl-ice-row{padding:6px 0;}
+  .dl-step-val{width:52px;}
+}
 .dl-section{background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;}
 .dl-section-title{font-size:.75rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;}
 .dl-row{display:flex;gap:8px;margin-bottom:12px;}
@@ -477,10 +486,11 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 
   <!-- Tab 0: บันทึก -->
   <div class="dl-body" id="dlPanel0">
-    <!-- เลือกวัน + สาย -->
+   <div class="dl-body-inner">
+    <!-- เลือกวัน + สาย + คนขับ -->
     <div class="dl-section">
       <div class="dl-section-title">ข้อมูลพื้นฐาน</div>
-      <div class="dl-row">
+      <div class="dl-2col">
         <div class="dl-field">
           <label class="dl-label">วันที่</label>
           <input class="dl-input" type="date" id="dlDate">
@@ -490,59 +500,58 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
           <select class="dl-select" id="dlRoute"></select>
         </div>
       </div>
-      <div class="dl-field">
+      <div class="dl-field" style="margin-top:10px">
         <label class="dl-label">ชื่อคนขับ (วันนี้)</label>
         <input class="dl-input" type="text" id="dlDriver" placeholder="ชื่อคนขับ...">
       </div>
     </div>
 
-    <!-- จำนวนถุง -->
+    <!-- จำนวนถุง + ราคา -->
     <div class="dl-section">
       <div class="dl-section-title">จำนวนถุงที่ขายได้</div>
       <div id="dlIceList"></div>
-      <div class="dl-row" style="margin-top:12px;margin-bottom:0">
+      <div class="dl-field" style="margin-top:10px;max-width:180px">
+        <label class="dl-label">ราคา/ถุง (บาท)</label>
+        <input class="dl-input" type="number" id="dlPrice" placeholder="30" value="30" min="1" oninput="dlCalc()">
+      </div>
+    </div>
+
+    <!-- ยอดเงิน + ค่าใช้จ่าย (2 คอลัมน์บน desktop) -->
+    <div class="dl-2col">
+      <div class="dl-section">
+        <div class="dl-section-title">ยอดเงิน</div>
+        <div id="dlCalcBox" style="display:none" class="dl-calc">
+          <div class="dl-calc-row"><span class="lbl">ยอดคาดหวัง</span><span class="val" id="dlExpected">฿0</span></div>
+          <div class="dl-calc-row" id="dlDiffRow"><span class="lbl">ขาด / เกิน</span><span class="val" id="dlDiff">–</span></div>
+        </div>
         <div class="dl-field">
-          <label class="dl-label">ราคา/ถุง (บาท)</label>
-          <input class="dl-input" type="number" id="dlPrice" placeholder="30" value="30" min="1" oninput="dlCalc()">
+          <label class="dl-label">เงินที่เก็บได้จริง (บาท)</label>
+          <input class="dl-input" type="number" id="dlActual" placeholder="0" min="0" oninput="dlCalc()">
         </div>
       </div>
-    </div>
 
-    <!-- ยอดเงิน -->
-    <div class="dl-section">
-      <div class="dl-section-title">ยอดเงิน</div>
-      <div id="dlCalcBox" style="display:none" class="dl-calc">
-        <div class="dl-calc-row"><span class="lbl">ยอดคาดหวัง (ถุง × ราคา)</span><span class="val" id="dlExpected">฿0</span></div>
-        <div class="dl-calc-row" id="dlDiffRow"><span class="lbl">ขาด / เกิน</span><span class="val" id="dlDiff">–</span></div>
-      </div>
-      <div class="dl-field">
-        <label class="dl-label">เงินที่เก็บได้จริง (บาท)</label>
-        <input class="dl-input" type="number" id="dlActual" placeholder="0" min="0" oninput="dlCalc()">
-      </div>
-    </div>
-
-    <!-- ค่าใช้จ่าย -->
-    <div class="dl-section">
-      <div class="dl-section-title">ค่าใช้จ่าย</div>
-      <div class="dl-expense-row">
-        <span class="dl-expense-icon">⛽</span>
-        <span class="dl-expense-label">ค่าน้ำมัน</span>
-        <input class="dl-expense-input" type="number" id="dlFuel" placeholder="0" min="0" oninput="dlCalcNet()">
-      </div>
-      <div class="dl-expense-row">
-        <span class="dl-expense-icon">👦</span>
-        <span class="dl-expense-label">ค่าเด็กติดรถ</span>
-        <input class="dl-expense-input" type="number" id="dlHelper" placeholder="300" min="0" oninput="dlCalcNet()">
-      </div>
-      <div class="dl-expense-row">
-        <span class="dl-expense-icon">📝</span>
-        <span class="dl-expense-label">ค่าอื่นๆ</span>
-        <input class="dl-expense-input" type="number" id="dlOther" placeholder="0" min="0" oninput="dlCalcNet()">
-      </div>
-      <div class="dl-expense-row" style="margin-bottom:0">
-        <span class="dl-expense-icon">💬</span>
-        <span class="dl-expense-label">หมายเหตุ</span>
-        <input class="dl-expense-input" type="text" id="dlNote" placeholder="รายละเอียดค่าอื่นๆ...">
+      <div class="dl-section">
+        <div class="dl-section-title">ค่าใช้จ่าย</div>
+        <div class="dl-expense-row">
+          <span class="dl-expense-icon">⛽</span>
+          <span class="dl-expense-label">น้ำมัน</span>
+          <input class="dl-expense-input" type="number" id="dlFuel" placeholder="0" min="0" oninput="dlCalcNet()">
+        </div>
+        <div class="dl-expense-row">
+          <span class="dl-expense-icon">👦</span>
+          <span class="dl-expense-label">ค่าเด็ก</span>
+          <input class="dl-expense-input" type="number" id="dlHelper" placeholder="300" min="0" oninput="dlCalcNet()">
+        </div>
+        <div class="dl-expense-row">
+          <span class="dl-expense-icon">📝</span>
+          <span class="dl-expense-label">อื่นๆ</span>
+          <input class="dl-expense-input" type="number" id="dlOther" placeholder="0" min="0" oninput="dlCalcNet()">
+        </div>
+        <div class="dl-expense-row" style="margin-bottom:0">
+          <span class="dl-expense-icon">💬</span>
+          <span class="dl-expense-label">หมายเหตุ</span>
+          <input class="dl-expense-input" type="text" id="dlNote" placeholder="รายละเอียด...">
+        </div>
       </div>
     </div>
 
@@ -554,27 +563,30 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 
     <button class="btn-dl-save" onclick="saveDailyLog()">💾 บันทึกยอด</button>
 
-    <!-- รายการวันนี้ -->
+    <!-- รายการล่าสุด -->
     <div style="margin-top:20px">
       <div style="font-size:.75rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">รายการล่าสุด</div>
       <div id="dlLogList"><div style="text-align:center;color:#aaa;font-size:.82rem;padding:20px">ยังไม่มีข้อมูล</div></div>
     </div>
+   </div>
   </div>
 
   <!-- Tab 1: รายงาน -->
   <div class="dl-body" id="dlPanel1" style="display:none">
+   <div class="dl-body-inner">
     <div class="dl-rpt-filter">
       <button class="dl-rpt-btn active" id="rptBtnDay" onclick="switchRpt('day')">รายวัน</button>
       <button class="dl-rpt-btn" id="rptBtnMonth" onclick="switchRpt('month')">รายเดือน</button>
     </div>
-    <div class="dl-row" style="margin-bottom:14px">
+    <div class="dl-2col" style="margin-bottom:14px">
       <input class="dl-input" type="date" id="rptDate" oninput="loadReport()">
-      <select class="dl-select" id="rptRoute" onchange="loadReport()" style="max-width:140px">
+      <select class="dl-select" id="rptRoute" onchange="loadReport()">
         <option value="">ทุกสาย</option>
       </select>
     </div>
     <div class="dl-rpt-summary" id="rptSummary"></div>
     <div id="rptList"><div style="text-align:center;color:#aaa;font-size:.82rem;padding:20px">เลือกวันที่เพื่อดูรายงาน</div></div>
+   </div>
   </div>
 </div>
 
