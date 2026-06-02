@@ -892,7 +892,11 @@ function showMain(){
 async function sbGet(t,q=''){const r=await fetch(`${SUPA_URL}/rest/v1/${t}?${q}`,{headers:{...H,'Prefer':'return=representation'}});return r.ok?r.json():[];}
 async function sbUpsert(t,data){const r=await fetch(`${SUPA_URL}/rest/v1/${t}`,{method:'POST',headers:{...H,'Prefer':'resolution=merge-duplicates,return=representation'},body:JSON.stringify(data)});return r.ok;}
 async function sbDelete(t,f){const r=await fetch(`${SUPA_URL}/rest/v1/${t}?${f}`,{method:'DELETE',headers:H});return r.ok;}
-async function sbInsert(t,data){const r=await fetch(`${SUPA_URL}/rest/v1/${t}`,{method:'POST',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify(data)});return r.ok;}
+async function sbInsert(t,data){
+  const r=await fetch(`${SUPA_URL}/rest/v1/${t}`,{method:'POST',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify(data)});
+  if(!r.ok){const err=await r.json().catch(()=>({}));console.error('sbInsert error',r.status,err);showToast(`❌ ${err.message||err.hint||r.status}`);}
+  return r.ok;
+}
 
 async function uploadPhoto(id,b64){
   try{const res=await fetch(b64);const blob=await res.blob();const ext=blob.type.includes('png')?'png':'jpg';const path=`${today()}/${id}.${ext}`;
@@ -1545,7 +1549,6 @@ async function saveDailyLog(){
   const data={date,route_name:route,driver_name:driver,bags_ts,bags_tl,bags_cc,bags_cf,price_per_bag:price,actual_revenue:actual,fuel_cost:fuel,helper_cost:helper,other_cost:other,other_note:note};
   const ok=await sbInsert('daily_logs',data);
   if(ok){showToast('✅ บันทึกยอดแล้ว');dlSetDefaults();dlLoadLogs();}
-  else showToast('❌ บันทึกไม่ได้');
 }
 
 async function dlLoadLogs(){
