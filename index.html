@@ -259,6 +259,72 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:9px 18px;border-radius:20px;font-size:.82rem;font-weight:600;z-index:300;white-space:nowrap;animation:toastIn .2s ease;}
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 
+/* ── Daily Log Screen ── */
+#dailyLogScreen{position:fixed;inset:0;z-index:150;background:#f5f5f5;display:none;flex-direction:column;}
+.dl-header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;}
+.dl-title{flex:1;font-size:1rem;font-weight:700;}
+.dl-tabs{display:flex;background:#fff;border-bottom:2px solid #f0f0f0;padding:0 16px;}
+.dl-tab{flex:1;padding:11px 0;font-size:.82rem;font-weight:700;color:#aaa;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:'Sarabun',sans-serif;}
+.dl-tab.active{color:#1a1a1a;border-bottom-color:#1a1a1a;}
+.dl-body{flex:1;overflow-y:auto;padding:16px 16px 40px;}
+.dl-section{background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;}
+.dl-section-title{font-size:.75rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;}
+.dl-row{display:flex;gap:8px;margin-bottom:12px;}
+.dl-field{display:flex;flex-direction:column;gap:6px;flex:1;}
+.dl-label{font-size:.78rem;font-weight:700;color:#555;}
+.dl-input{border:1.5px solid #e5e5e5;border-radius:10px;padding:11px 12px;font-family:'Sarabun',sans-serif;font-size:.95rem;outline:none;background:#fff;width:100%;}
+.dl-input:focus{border-color:#1a1a1a;}
+.dl-select{border:1.5px solid #e5e5e5;border-radius:10px;padding:11px 12px;font-family:'Sarabun',sans-serif;font-size:.95rem;outline:none;background:#fff;width:100%;appearance:none;}
+.dl-ice-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f5f5f5;}
+.dl-ice-row:last-child{border-bottom:none;}
+.dl-ice-icon{font-size:1.1rem;width:24px;text-align:center;}
+.dl-ice-name{flex:1;font-size:.88rem;font-weight:600;}
+.dl-stepper{display:flex;align-items:center;gap:6px;}
+.dl-step-btn{width:30px;height:30px;border:1.5px solid #e5e5e5;border-radius:8px;background:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;color:#555;}
+.dl-step-val{width:44px;text-align:center;border:1.5px solid #e5e5e5;border-radius:8px;padding:5px 4px;font-family:'Sarabun',sans-serif;font-size:.9rem;font-weight:700;outline:none;}
+.dl-calc{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:12px 14px;margin-bottom:12px;}
+.dl-calc-row{display:flex;justify-content:space-between;align-items:center;font-size:.82rem;padding:2px 0;}
+.dl-calc-row .lbl{color:#555;}
+.dl-calc-row .val{font-weight:700;}
+.dl-calc-row.diff-ok .val{color:#16a34a;}
+.dl-calc-row.diff-bad .val{color:#dc2626;}
+.dl-calc-row.diff-zero .val{color:#888;}
+.dl-calc-total{display:flex;justify-content:space-between;align-items:center;font-size:.95rem;font-weight:800;border-top:1px solid #bbf7d0;padding-top:8px;margin-top:6px;}
+.dl-expense-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.dl-expense-icon{font-size:1.1rem;width:24px;text-align:center;}
+.dl-expense-label{font-size:.82rem;font-weight:600;width:80px;color:#555;flex-shrink:0;}
+.dl-expense-input{flex:1;border:1.5px solid #e5e5e5;border-radius:10px;padding:9px 10px;font-family:'Sarabun',sans-serif;font-size:.9rem;outline:none;}
+.dl-net{background:#1a1a1a;color:#fff;border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;}
+.dl-net .lbl{font-size:.82rem;color:#aaa;}
+.dl-net .val{font-size:1.1rem;font-weight:800;}
+.btn-dl-save{width:100%;background:#1a1a1a;color:#fff;border:none;border-radius:14px;padding:15px;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;margin-top:4px;}
+.btn-dl-save:active{opacity:.8;}
+/* Log list */
+.dl-log-item{background:#fff;border-radius:14px;padding:14px;margin-bottom:8px;border:1px solid #ebebeb;}
+.dl-log-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.dl-log-route{font-size:.88rem;font-weight:800;flex:1;}
+.dl-log-driver{font-size:.72rem;color:#888;background:#f5f5f5;border-radius:8px;padding:2px 8px;}
+.dl-log-date{font-size:.7rem;color:#bbb;}
+.dl-log-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:8px;}
+.dl-log-stat{background:#f9f9f9;border-radius:8px;padding:7px 10px;}
+.dl-log-stat .v{font-size:.9rem;font-weight:700;}
+.dl-log-stat .l{font-size:.62rem;color:#aaa;margin-top:1px;}
+.dl-log-stat.green .v{color:#16a34a;}
+.dl-log-stat.red .v{color:#dc2626;}
+.dl-log-stat.blue .v{color:#2563eb;}
+.dl-log-del{background:none;border:none;color:#ddd;cursor:pointer;font-size:.9rem;padding:4px;transition:color .15s;}
+.dl-log-del:hover{color:#ef4444;}
+/* Report */
+.dl-rpt-filter{display:flex;gap:8px;margin-bottom:14px;}
+.dl-rpt-btn{flex:1;padding:9px;border:1.5px solid #e5e5e5;border-radius:10px;background:#fff;font-family:'Sarabun',sans-serif;font-size:.8rem;font-weight:700;color:#888;cursor:pointer;}
+.dl-rpt-btn.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a;}
+.dl-rpt-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;}
+.dl-rpt-card{background:#fff;border-radius:14px;padding:14px;border:1px solid #ebebeb;text-align:center;}
+.dl-rpt-card .v{font-size:1.2rem;font-weight:800;}
+.dl-rpt-card .l{font-size:.65rem;color:#aaa;margin-top:2px;}
+.dl-rpt-card.green .v{color:#16a34a;}
+.dl-rpt-card.red .v{color:#dc2626;}
+
 /* ── Delivery Mode ── */
 #deliveryScreen{position:fixed;inset:0;z-index:150;background:#f5f5f5;display:none;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
 #deliveryScreen.open{display:flex;transform:translateX(0);}
@@ -360,14 +426,9 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
     <div id="sbRouteList"><div style="padding:20px;text-align:center;color:#aaa;font-size:.82rem">กำลังโหลด...</div></div>
   </div>
   <div class="sb-panel" id="sbPanel1">
-    <div class="sb-coming">
-      <div class="sb-ci">📊</div>
-      <h3>บันทึกยอดขายประจำวัน</h3>
-      <p>ฟีเจอร์นี้กำลังออกแบบ<br>จะใช้บันทึกยอดขายแต่ละสาย<br>เพื่อคิดเงินเดือนคนขับ</p>
-      <div class="sb-vote">
-        <button class="sb-vote-btn" id="voteDriver" onclick="castVote('driver')">👤 คนขับกรอกเอง</button>
-        <button class="sb-vote-btn" id="voteOffice" onclick="castVote('office')">🏢 พนักงานกรอก</button>
-      </div>
+    <div style="padding:8px 0">
+      <button onclick="openDailyLog();closeSidebar();" style="width:100%;background:#1a1a1a;color:#fff;border:none;border-radius:14px;padding:15px;font-family:'Sarabun',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">📊 เปิดระบบบันทึกยอด</button>
+      <p style="font-size:.75rem;color:#aaa;text-align:center;margin-top:12px;line-height:1.6;">บันทึกยอดขายรายวันแต่ละสาย<br>ดูรายได้ ค่าใช้จ่าย ขาด/เกิน</p>
     </div>
   </div>
 </div>
@@ -400,6 +461,120 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
   </div>
   <div class="hist-body" id="histBody">
     <div style="padding:40px;text-align:center;color:#aaa;font-size:.85rem">กำลังโหลด...</div>
+  </div>
+</div>
+
+<!-- Daily Log Screen -->
+<div id="dailyLogScreen">
+  <div class="dl-header">
+    <button onclick="closeDailyLog()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:#555;">←</button>
+    <div class="dl-title">📊 บันทึกยอดประจำวัน</div>
+  </div>
+  <div class="dl-tabs">
+    <button class="dl-tab active" id="dlTab0" onclick="switchDlTab(0)">✏️ บันทึก</button>
+    <button class="dl-tab" id="dlTab1" onclick="switchDlTab(1)">📈 รายงาน</button>
+  </div>
+
+  <!-- Tab 0: บันทึก -->
+  <div class="dl-body" id="dlPanel0">
+    <!-- เลือกวัน + สาย -->
+    <div class="dl-section">
+      <div class="dl-section-title">ข้อมูลพื้นฐาน</div>
+      <div class="dl-row">
+        <div class="dl-field">
+          <label class="dl-label">วันที่</label>
+          <input class="dl-input" type="date" id="dlDate">
+        </div>
+        <div class="dl-field">
+          <label class="dl-label">สาย</label>
+          <select class="dl-select" id="dlRoute"></select>
+        </div>
+      </div>
+      <div class="dl-field">
+        <label class="dl-label">ชื่อคนขับ (วันนี้)</label>
+        <input class="dl-input" type="text" id="dlDriver" placeholder="ชื่อคนขับ...">
+      </div>
+    </div>
+
+    <!-- จำนวนถุง -->
+    <div class="dl-section">
+      <div class="dl-section-title">จำนวนถุงที่ขายได้</div>
+      <div id="dlIceList"></div>
+      <div class="dl-row" style="margin-top:12px;margin-bottom:0">
+        <div class="dl-field">
+          <label class="dl-label">ราคา/ถุง (บาท)</label>
+          <input class="dl-input" type="number" id="dlPrice" placeholder="30" value="30" min="1" oninput="dlCalc()">
+        </div>
+      </div>
+    </div>
+
+    <!-- ยอดเงิน -->
+    <div class="dl-section">
+      <div class="dl-section-title">ยอดเงิน</div>
+      <div id="dlCalcBox" style="display:none" class="dl-calc">
+        <div class="dl-calc-row"><span class="lbl">ยอดคาดหวัง (ถุง × ราคา)</span><span class="val" id="dlExpected">฿0</span></div>
+        <div class="dl-calc-row" id="dlDiffRow"><span class="lbl">ขาด / เกิน</span><span class="val" id="dlDiff">–</span></div>
+      </div>
+      <div class="dl-field">
+        <label class="dl-label">เงินที่เก็บได้จริง (บาท)</label>
+        <input class="dl-input" type="number" id="dlActual" placeholder="0" min="0" oninput="dlCalc()">
+      </div>
+    </div>
+
+    <!-- ค่าใช้จ่าย -->
+    <div class="dl-section">
+      <div class="dl-section-title">ค่าใช้จ่าย</div>
+      <div class="dl-expense-row">
+        <span class="dl-expense-icon">⛽</span>
+        <span class="dl-expense-label">ค่าน้ำมัน</span>
+        <input class="dl-expense-input" type="number" id="dlFuel" placeholder="0" min="0" oninput="dlCalcNet()">
+      </div>
+      <div class="dl-expense-row">
+        <span class="dl-expense-icon">👦</span>
+        <span class="dl-expense-label">ค่าเด็กติดรถ</span>
+        <input class="dl-expense-input" type="number" id="dlHelper" placeholder="300" min="0" oninput="dlCalcNet()">
+      </div>
+      <div class="dl-expense-row">
+        <span class="dl-expense-icon">📝</span>
+        <span class="dl-expense-label">ค่าอื่นๆ</span>
+        <input class="dl-expense-input" type="number" id="dlOther" placeholder="0" min="0" oninput="dlCalcNet()">
+      </div>
+      <div class="dl-expense-row" style="margin-bottom:0">
+        <span class="dl-expense-icon">💬</span>
+        <span class="dl-expense-label">หมายเหตุ</span>
+        <input class="dl-expense-input" type="text" id="dlNote" placeholder="รายละเอียดค่าอื่นๆ...">
+      </div>
+    </div>
+
+    <!-- สรุป net -->
+    <div class="dl-net" id="dlNetBox">
+      <span class="lbl">รายได้สุทธิ</span>
+      <span class="val" id="dlNet">฿0</span>
+    </div>
+
+    <button class="btn-dl-save" onclick="saveDailyLog()">💾 บันทึกยอด</button>
+
+    <!-- รายการวันนี้ -->
+    <div style="margin-top:20px">
+      <div style="font-size:.75rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">รายการล่าสุด</div>
+      <div id="dlLogList"><div style="text-align:center;color:#aaa;font-size:.82rem;padding:20px">ยังไม่มีข้อมูล</div></div>
+    </div>
+  </div>
+
+  <!-- Tab 1: รายงาน -->
+  <div class="dl-body" id="dlPanel1" style="display:none">
+    <div class="dl-rpt-filter">
+      <button class="dl-rpt-btn active" id="rptBtnDay" onclick="switchRpt('day')">รายวัน</button>
+      <button class="dl-rpt-btn" id="rptBtnMonth" onclick="switchRpt('month')">รายเดือน</button>
+    </div>
+    <div class="dl-row" style="margin-bottom:14px">
+      <input class="dl-input" type="date" id="rptDate" oninput="loadReport()">
+      <select class="dl-select" id="rptRoute" onchange="loadReport()" style="max-width:140px">
+        <option value="">ทุกสาย</option>
+      </select>
+    </div>
+    <div class="dl-rpt-summary" id="rptSummary"></div>
+    <div id="rptList"><div style="text-align:center;color:#aaa;font-size:.82rem;padding:20px">เลือกวันที่เพื่อดูรายงาน</div></div>
   </div>
 </div>
 
@@ -1239,6 +1414,207 @@ function dlvSkip(){
   dlvIdx=Math.min(dlvIdx+1, shops.length);
   renderDlv();
   document.getElementById('dlvBody').scrollTop=0;
+}
+
+// ── Daily Log ──
+let dlTabIdx=0, rptMode='day';
+
+function openDailyLog(){
+  const s=document.getElementById('dailyLogScreen');
+  s.style.display='flex';
+  dlSetDefaults();
+  dlBuildIce();
+  dlLoadRoutes();
+  dlLoadLogs();
+}
+
+function closeDailyLog(){
+  document.getElementById('dailyLogScreen').style.display='none';
+}
+
+function switchDlTab(i){
+  dlTabIdx=i;
+  document.querySelectorAll('.dl-tab').forEach((t,idx)=>t.classList.toggle('active',idx===i));
+  document.getElementById('dlPanel0').style.display=i===0?'block':'none';
+  document.getElementById('dlPanel1').style.display=i===1?'block':'none';
+  if(i===1)loadReport();
+}
+
+function dlSetDefaults(){
+  const today=new Date();
+  document.getElementById('dlDate').value=today.toISOString().split('T')[0];
+  document.getElementById('dlActual').value='';
+  document.getElementById('dlFuel').value='';
+  document.getElementById('dlHelper').value='300';
+  document.getElementById('dlOther').value='';
+  document.getElementById('dlNote').value='';
+  document.getElementById('dlPrice').value='30';
+  document.getElementById('dlDriver').value='';
+  document.getElementById('dlCalcBox').style.display='none';
+  document.getElementById('dlNet').textContent='฿0';
+  // reset ice
+  ICE.forEach(ic=>{const inp=document.getElementById('dli-'+ic.k);if(inp)inp.value='0';});
+}
+
+function dlBuildIce(){
+  document.getElementById('dlIceList').innerHTML=ICE.map(ic=>`
+    <div class="dl-ice-row">
+      <span class="dl-ice-icon">${ic.icon}</span>
+      <span class="dl-ice-name">${ic.label}</span>
+      <div class="dl-stepper">
+        <button class="dl-step-btn" onclick="dlStep('${ic.k}',-1)">−</button>
+        <input class="dl-step-val" type="number" id="dli-${ic.k}" value="0" min="0" oninput="dlCalc()" onfocus="this.select()">
+        <button class="dl-step-btn" onclick="dlStep('${ic.k}',1)">+</button>
+      </div>
+    </div>`).join('');
+}
+
+function dlStep(k,d){
+  const inp=document.getElementById('dli-'+k);
+  inp.value=Math.max(0,(parseInt(inp.value)||0)+d);
+  dlCalc();
+}
+
+function dlCalc(){
+  const bags={ts:0,tl:0,cc:0,cf:0};
+  let total=0;
+  ICE.forEach(ic=>{const v=parseInt(document.getElementById('dli-'+ic.k)?.value)||0;bags[ic.k]=v;total+=v;});
+  const price=parseInt(document.getElementById('dlPrice').value)||0;
+  const expected=total*price;
+  const actual=parseInt(document.getElementById('dlActual').value)||0;
+  const diff=actual-expected;
+  document.getElementById('dlCalcBox').style.display=total||actual?'block':'none';
+  document.getElementById('dlExpected').textContent='฿'+expected.toLocaleString();
+  const diffEl=document.getElementById('dlDiff');
+  const diffRow=document.getElementById('dlDiffRow');
+  diffEl.textContent=diff===0?'ครบ':(diff>0?'+฿'+diff.toLocaleString():'−฿'+Math.abs(diff).toLocaleString());
+  diffRow.className='dl-calc-row '+(diff>0?'diff-ok':diff<0?'diff-bad':'diff-zero');
+  dlCalcNet();
+}
+
+function dlCalcNet(){
+  const actual=parseInt(document.getElementById('dlActual').value)||0;
+  const fuel=parseInt(document.getElementById('dlFuel').value)||0;
+  const helper=parseInt(document.getElementById('dlHelper').value)||0;
+  const other=parseInt(document.getElementById('dlOther').value)||0;
+  const net=actual-fuel-helper-other;
+  document.getElementById('dlNet').textContent='฿'+net.toLocaleString();
+  document.getElementById('dlNet').style.color=net<0?'#f87171':'#fff';
+}
+
+async function dlLoadRoutes(){
+  const routes=await sbGet('routes','order=sort_order.asc,id.asc');
+  const sel=document.getElementById('dlRoute');
+  const rptSel=document.getElementById('rptRoute');
+  sel.innerHTML=routes.map(r=>`<option value="${esc(r.name)}">${esc(r.name)}</option>`).join('');
+  rptSel.innerHTML='<option value="">ทุกสาย</option>'+routes.map(r=>`<option value="${esc(r.name)}">${esc(r.name)}</option>`).join('');
+}
+
+async function saveDailyLog(){
+  const date=document.getElementById('dlDate').value;
+  const route=document.getElementById('dlRoute').value;
+  if(!date||!route){showToast('เลือกวันที่และสายก่อน');return;}
+  const bags_ts=parseInt(document.getElementById('dli-ts').value)||0;
+  const bags_tl=parseInt(document.getElementById('dli-tl').value)||0;
+  const bags_cc=parseInt(document.getElementById('dli-cc').value)||0;
+  const bags_cf=parseInt(document.getElementById('dli-cf').value)||0;
+  const total=bags_ts+bags_tl+bags_cc+bags_cf;
+  const price=parseInt(document.getElementById('dlPrice').value)||0;
+  const actual=parseInt(document.getElementById('dlActual').value)||0;
+  const fuel=parseInt(document.getElementById('dlFuel').value)||0;
+  const helper=parseInt(document.getElementById('dlHelper').value)||0;
+  const other=parseInt(document.getElementById('dlOther').value)||0;
+  const note=document.getElementById('dlNote').value.trim();
+  const driver=document.getElementById('dlDriver').value.trim();
+  if(!total&&!actual){showToast('กรอกจำนวนถุงหรือยอดเงินก่อน');return;}
+  const data={date,route_name:route,driver_name:driver,bags_ts,bags_tl,bags_cc,bags_cf,price_per_bag:price,actual_revenue:actual,fuel_cost:fuel,helper_cost:helper,other_cost:other,other_note:note};
+  const ok=await sbUpsert('daily_logs',[data]);
+  if(ok){showToast('✅ บันทึกยอดแล้ว');dlSetDefaults();dlLoadLogs();}
+  else showToast('❌ บันทึกไม่ได้');
+}
+
+async function dlLoadLogs(){
+  const date=document.getElementById('dlDate').value||today();
+  const rows=await sbGet('daily_logs',`date=eq.${date}&order=created_at.desc`);
+  const el=document.getElementById('dlLogList');
+  if(!rows.length){el.innerHTML='<div style="text-align:center;color:#aaa;font-size:.82rem;padding:20px">ยังไม่มีข้อมูลวันนี้</div>';return;}
+  el.innerHTML=rows.map(r=>{
+    const total=(r.bags_ts||0)+(r.bags_tl||0)+(r.bags_cc||0)+(r.bags_cf||0);
+    const expected=total*(r.price_per_bag||0);
+    const diff=(r.actual_revenue||0)-expected;
+    const exp=(r.fuel_cost||0)+(r.helper_cost||0)+(r.other_cost||0);
+    const net=(r.actual_revenue||0)-exp;
+    const iceDetail=ICE.filter(ic=>r['bags_'+ic.k]>0).map(ic=>`${ic.icon}${r['bags_'+ic.k]}`).join(' ');
+    return`<div class="dl-log-item">
+      <div class="dl-log-header">
+        <span class="dl-log-route">${esc(r.route_name)}</span>
+        ${r.driver_name?`<span class="dl-log-driver">👤 ${esc(r.driver_name)}</span>`:''}
+        <button class="dl-log-del" onclick="delDailyLog(${r.id})">🗑️</button>
+      </div>
+      <div class="dl-log-grid">
+        <div class="dl-log-stat"><div class="v">${total} ถุง</div><div class="l">${iceDetail||'–'}</div></div>
+        <div class="dl-log-stat blue"><div class="v">฿${(r.actual_revenue||0).toLocaleString()}</div><div class="l">เก็บได้จริง</div></div>
+        <div class="dl-log-stat ${diff>=0?'green':'red'}"><div class="v">${diff===0?'ครบ':diff>0?'+฿'+diff.toLocaleString():'−฿'+Math.abs(diff).toLocaleString()}</div><div class="l">ขาด/เกิน</div></div>
+        <div class="dl-log-stat ${net>=0?'green':'red'}"><div class="v">฿${net.toLocaleString()}</div><div class="l">สุทธิ (หักค่าใช้จ่าย)</div></div>
+      </div>
+      ${r.other_note?`<div style="font-size:.72rem;color:#888">💬 ${esc(r.other_note)}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+async function delDailyLog(id){
+  if(!confirm('ลบรายการนี้?'))return;
+  const ok=await sbDelete('daily_logs',`id=eq.${id}`);
+  if(ok){showToast('ลบแล้ว');dlLoadLogs();}
+  else showToast('ลบไม่ได้');
+}
+
+function switchRpt(mode){
+  rptMode=mode;
+  document.getElementById('rptBtnDay').classList.toggle('active',mode==='day');
+  document.getElementById('rptBtnMonth').classList.toggle('active',mode==='month');
+  loadReport();
+}
+
+async function loadReport(){
+  const dateVal=document.getElementById('rptDate').value;
+  const route=document.getElementById('rptRoute').value;
+  if(!dateVal)return;
+  let q='';
+  if(rptMode==='day') q=`date=eq.${dateVal}`;
+  else{ const m=dateVal.slice(0,7);q=`date=gte.${m}-01&date=lte.${m}-31`; }
+  if(route) q+=`&route_name=eq.${encodeURIComponent(route)}`;
+  q+='&order=date.desc,created_at.desc';
+  const rows=await sbGet('daily_logs',q);
+  // summary
+  const tBags=rows.reduce((a,r)=>(r.bags_ts||0)+(r.bags_tl||0)+(r.bags_cc||0)+(r.bags_cf||0)+a,0);
+  const tActual=rows.reduce((a,r)=>a+(r.actual_revenue||0),0);
+  const tExp=rows.reduce((a,r)=>a+(r.fuel_cost||0)+(r.helper_cost||0)+(r.other_cost||0),0);
+  const tNet=tActual-tExp;
+  document.getElementById('rptSummary').innerHTML=`
+    <div class="dl-rpt-card"><div class="v">${rows.length}</div><div class="l">รายการ</div></div>
+    <div class="dl-rpt-card"><div class="v">${tBags}</div><div class="l">ถุงรวม</div></div>
+    <div class="dl-rpt-card blue"><div class="v">฿${tActual.toLocaleString()}</div><div class="l">เก็บได้รวม</div></div>
+    <div class="dl-rpt-card ${tNet>=0?'green':'red'}"><div class="v">฿${tNet.toLocaleString()}</div><div class="l">สุทธิรวม</div></div>`;
+  if(!rows.length){document.getElementById('rptList').innerHTML='<div style="text-align:center;color:#aaa;font-size:.82rem;padding:20px">ไม่มีข้อมูลในช่วงนี้</div>';return;}
+  document.getElementById('rptList').innerHTML=rows.map(r=>{
+    const total=(r.bags_ts||0)+(r.bags_tl||0)+(r.bags_cc||0)+(r.bags_cf||0);
+    const exp=(r.fuel_cost||0)+(r.helper_cost||0)+(r.other_cost||0);
+    const net=(r.actual_revenue||0)-exp;
+    return`<div class="dl-log-item">
+      <div class="dl-log-header">
+        <span class="dl-log-route">${esc(r.route_name)}</span>
+        ${r.driver_name?`<span class="dl-log-driver">👤 ${esc(r.driver_name)}</span>`:''}
+        <span class="dl-log-date">${r.date}</span>
+      </div>
+      <div class="dl-log-grid">
+        <div class="dl-log-stat"><div class="v">${total} ถุง</div><div class="l">รวม</div></div>
+        <div class="dl-log-stat blue"><div class="v">฿${(r.actual_revenue||0).toLocaleString()}</div><div class="l">เก็บได้</div></div>
+        <div class="dl-log-stat red"><div class="v">฿${exp.toLocaleString()}</div><div class="l">ค่าใช้จ่าย</div></div>
+        <div class="dl-log-stat ${net>=0?'green':'red'}"><div class="v">฿${net.toLocaleString()}</div><div class="l">สุทธิ</div></div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ── Sidebar ──
