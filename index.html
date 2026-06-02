@@ -1688,14 +1688,7 @@ function sbSelectRoute(name){
   buildIceUI();loadData();
 }
 
-function castVote(type){
-  const key='sbVote';
-  localStorage.setItem(key,type);
-  document.getElementById('voteDriver').classList.toggle('voted',type==='driver');
-  document.getElementById('voteOffice').classList.toggle('voted',type==='office');
-}
-// restore vote
-(function(){const v=localStorage.getItem('sbVote');if(v)setTimeout(()=>castVote(v),0);})();
+// castVote removed (vote buttons no longer in UI)
 </script>
 </body>
 </html>
