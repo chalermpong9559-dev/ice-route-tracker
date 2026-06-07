@@ -1561,6 +1561,11 @@ async function saveRun(){
   const items=runItems.map((it,i)=>({session_id:session.id,seq:i+1,shop_name:it.shopName,price:it.price,ice:it.ice,has_bonus:it.hasBonus,total_qty:it.totalQty,total_bonus:it.totalBonus,total_money:it.totalMoney,note:it.note,is_new:it.isNew,skipped:dlvSkipped.has(i)}));
   const res2=await fetch(`${SUPA_URL}/rest/v1/run_items`,{method:'POST',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify(items)});
   if(!res2.ok){const e=await res2.json().catch(()=>({}));showToast('❌ '+(e.message||e.hint||res2.status));if(btn)btn.disabled=false;return;}
+  // 3. auto-save daily_log from run totals
+  const bags={ts:0,tl:0,cc:0,cf:0};
+  confirmed.forEach(it=>{ICE.forEach(ic=>{bags[ic.k]+=(it.ice[ic.k]||0);});});
+  const avgPrice=confirmed.length?Math.round(confirmed.reduce((a,it)=>a+it.price,0)/confirmed.length):35;
+  await sbInsert('daily_logs',{date:runDate,route_name:currentRoute,driver_name:driver,bags_ts:bags.ts,bags_tl:bags.tl,bags_cc:bags.cc,bags_cf:bags.cf,price_per_bag:avgPrice,actual_revenue:tMoney,fuel_cost:0,helper_cost:0,other_cost:0,other_note:'บันทึกจากวิ่งสายอัตโนมัติ'});
   const st=document.getElementById('runSaveStatus');
   if(st)st.innerHTML='<span style="color:#16a34a;font-weight:700">✅ บันทึกแล้ว!</span>';
   if(btn){btn.textContent='✅ บันทึกแล้ว';btn.style.background='#16a34a';}
