@@ -335,6 +335,19 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 .dl-rpt-card .l{font-size:.65rem;color:#aaa;margin-top:2px;}
 .dl-rpt-card.green .v{color:#16a34a;}
 .dl-rpt-card.red .v{color:#dc2626;}
+/* report table */
+.rpt-table{width:100%;border-collapse:collapse;font-size:.78rem;background:#fff;border-radius:14px;overflow:hidden;border:1px solid #ebebeb;}
+.rpt-table th{background:#f5f5f5;padding:8px 10px;text-align:center;font-weight:700;color:#666;font-size:.7rem;border-bottom:1px solid #ebebeb;white-space:nowrap;}
+.rpt-table th:first-child{text-align:left;}
+.rpt-table td{padding:9px 10px;text-align:center;border-bottom:1px solid #f5f5f5;color:#333;}
+.rpt-table td:first-child{text-align:left;font-weight:600;}
+.rpt-table tr:last-child td{border-bottom:none;}
+.rpt-table tr:hover td{background:#fafafa;}
+.rpt-table .total-row td{background:#1a1a1a;color:#fff;font-weight:700;}
+.rpt-table .money{color:#2563eb;font-weight:700;}
+.rpt-table .net-pos{color:#16a34a;font-weight:700;}
+.rpt-table .net-neg{color:#dc2626;font-weight:700;}
+.rpt-wrap{overflow-x:auto;border-radius:14px;margin-bottom:12px;}
 
 /* ── Delivery Mode ── */
 #deliveryScreen{position:fixed;inset:0;z-index:150;background:#f5f5f5;display:none;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
@@ -645,18 +658,14 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
   <!-- Tab 1: รายงาน -->
   <div class="dl-body" id="dlPanel1" style="display:none">
    <div class="dl-body-inner">
-    <div class="dl-rpt-filter">
-      <button class="dl-rpt-btn active" id="rptBtnDay" onclick="switchRpt('day')">รายวัน</button>
-      <button class="dl-rpt-btn" id="rptBtnMonth" onclick="switchRpt('month')">รายเดือน</button>
-    </div>
-    <div class="dl-2col" style="margin-bottom:14px">
-      <input class="dl-input" type="date" id="rptDate" oninput="loadReport()">
+    <div class="dl-2col" style="margin-bottom:10px">
+      <input class="dl-input" type="month" id="rptMonth" oninput="loadReport()">
       <select class="dl-select" id="rptRoute" onchange="loadReport()">
         <option value="">ทุกสาย</option>
       </select>
     </div>
     <div class="dl-rpt-summary" id="rptSummary"></div>
-    <div id="rptList"><div style="text-align:center;color:#aaa;font-size:.82rem;padding:20px">เลือกวันที่เพื่อดูรายงาน</div></div>
+    <div id="rptList"><div style="text-align:center;color:#aaa;font-size:.82rem;padding:20px">เลือกเดือนเพื่อดูรายงาน</div></div>
    </div>
   </div>
 </div>
@@ -1705,7 +1714,14 @@ function switchDlTab(i){
   document.querySelectorAll('.dl-tab').forEach((t,idx)=>t.classList.toggle('active',idx===i));
   document.getElementById('dlPanel0').style.display=i===0?'block':'none';
   document.getElementById('dlPanel1').style.display=i===1?'block':'none';
-  if(i===1)loadReport();
+  if(i===1){
+    // set default month to current month
+    if(!document.getElementById('rptMonth').value){
+      const n=new Date();
+      document.getElementById('rptMonth').value=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+    }
+    loadReport();
+  }
 }
 
 function dlSetDefaults(){
@@ -1836,52 +1852,65 @@ async function delDailyLog(id){
   else showToast('ลบไม่ได้');
 }
 
-function switchRpt(mode){
-  rptMode=mode;
-  document.getElementById('rptBtnDay').classList.toggle('active',mode==='day');
-  document.getElementById('rptBtnMonth').classList.toggle('active',mode==='month');
-  loadReport();
-}
-
 async function loadReport(){
-  const dateVal=document.getElementById('rptDate').value;
+  const month=document.getElementById('rptMonth').value;
   const route=document.getElementById('rptRoute').value;
-  if(!dateVal)return;
-  let q='';
-  if(rptMode==='day') q=`date=eq.${dateVal}`;
-  else{ const m=dateVal.slice(0,7);q=`date=gte.${m}-01&date=lte.${m}-31`; }
+  const list=document.getElementById('rptList');
+  if(!month){list.innerHTML='<div style="text-align:center;color:#aaa;font-size:.82rem;padding:20px">เลือกเดือนก่อน</div>';return;}
+  const [y,m]=month.split('-');
+  const lastDay=new Date(+y,+m,0).getDate();
+  let q=`date=gte.${y}-${m}-01&date=lte.${y}-${m}-${String(lastDay).padStart(2,'0')}`;
   if(route) q+=`&route_name=eq.${encodeURIComponent(route)}`;
-  q+='&order=date.desc,created_at.desc';
+  q+='&order=date.asc,created_at.asc';
   const rows=await sbGet('daily_logs',q);
-  // summary
-  const tBags=rows.reduce((a,r)=>(r.bags_ts||0)+(r.bags_tl||0)+(r.bags_cc||0)+(r.bags_cf||0)+a,0);
+  // summary cards
+  const tTs=rows.reduce((a,r)=>a+(r.bags_ts||0),0);
+  const tTl=rows.reduce((a,r)=>a+(r.bags_tl||0),0);
+  const tCc=rows.reduce((a,r)=>a+(r.bags_cc||0),0);
+  const tCf=rows.reduce((a,r)=>a+(r.bags_cf||0),0);
+  const tBags=tTs+tTl+tCc+tCf;
   const tActual=rows.reduce((a,r)=>a+(r.actual_revenue||0),0);
   const tExp=rows.reduce((a,r)=>a+(r.fuel_cost||0)+(r.helper_cost||0)+(r.other_cost||0),0);
   const tNet=tActual-tExp;
   document.getElementById('rptSummary').innerHTML=`
+    <div class="dl-rpt-card"><div class="v">${tBags.toLocaleString()}</div><div class="l">ถุงรวมเดือนนี้</div></div>
     <div class="dl-rpt-card"><div class="v">${rows.length}</div><div class="l">รายการ</div></div>
-    <div class="dl-rpt-card"><div class="v">${tBags}</div><div class="l">ถุงรวม</div></div>
     <div class="dl-rpt-card blue"><div class="v">฿${tActual.toLocaleString()}</div><div class="l">เก็บได้รวม</div></div>
     <div class="dl-rpt-card ${tNet>=0?'green':'red'}"><div class="v">฿${tNet.toLocaleString()}</div><div class="l">สุทธิรวม</div></div>`;
-  if(!rows.length){document.getElementById('rptList').innerHTML='<div style="text-align:center;color:#aaa;font-size:.82rem;padding:20px">ไม่มีข้อมูลในช่วงนี้</div>';return;}
-  document.getElementById('rptList').innerHTML=rows.map(r=>{
-    const total=(r.bags_ts||0)+(r.bags_tl||0)+(r.bags_cc||0)+(r.bags_cf||0);
+  if(!rows.length){list.innerHTML='<div style="text-align:center;color:#aaa;font-size:.82rem;padding:20px">ไม่มีข้อมูลในเดือนนี้</div>';return;}
+  const bodyRows=rows.map(r=>{
+    const ts=r.bags_ts||0,tl=r.bags_tl||0,cc=r.bags_cc||0,cf=r.bags_cf||0;
+    const total=ts+tl+cc+cf;
     const exp=(r.fuel_cost||0)+(r.helper_cost||0)+(r.other_cost||0);
     const net=(r.actual_revenue||0)-exp;
-    return`<div class="dl-log-item">
-      <div class="dl-log-header">
-        <span class="dl-log-route">${esc(r.route_name)}</span>
-        ${r.driver_name?`<span class="dl-log-driver">👤 ${esc(r.driver_name)}</span>`:''}
-        <span class="dl-log-date">${r.date}</span>
-      </div>
-      <div class="dl-log-grid">
-        <div class="dl-log-stat"><div class="v">${total} ถุง</div><div class="l">รวม</div></div>
-        <div class="dl-log-stat blue"><div class="v">฿${(r.actual_revenue||0).toLocaleString()}</div><div class="l">เก็บได้</div></div>
-        <div class="dl-log-stat red"><div class="v">฿${exp.toLocaleString()}</div><div class="l">ค่าใช้จ่าย</div></div>
-        <div class="dl-log-stat ${net>=0?'green':'red'}"><div class="v">฿${net.toLocaleString()}</div><div class="l">สุทธิ</div></div>
-      </div>
-    </div>`;
+    const d=new Date(r.date+'T00:00:00');
+    const dateStr=d.toLocaleDateString('th-TH',{day:'numeric',month:'short',weekday:'short'});
+    return`<tr>
+      <td><div style="font-size:.72rem;color:#bbb">${dateStr}</div><div>${esc(r.route_name)}</div>${r.driver_name?`<div style="font-size:.68rem;color:#aaa">👤${esc(r.driver_name)}</div>`:''}</td>
+      <td>${ts||'–'}</td>
+      <td>${tl||'–'}</td>
+      <td>${cc||'–'}</td>
+      <td>${cf||'–'}</td>
+      <td style="font-weight:700">${total}</td>
+      <td class="money">฿${(r.actual_revenue||0).toLocaleString()}</td>
+      <td style="color:#888">${exp?'฿'+exp.toLocaleString():'–'}</td>
+      <td class="${net>=0?'net-pos':'net-neg'}">฿${net.toLocaleString()}</td>
+      <td><button class="dl-log-del" onclick="delDailyLog(${r.id})">🗑</button></td>
+    </tr>`;
   }).join('');
+  list.innerHTML=`<div class="rpt-wrap"><table class="rpt-table">
+    <thead><tr>
+      <th>วันที่ / สาย</th>
+      <th>🔵หลอดเล็ก</th><th>🔷หลอดใหญ่</th><th>🌨บดหยาบ</th><th>❄บดละเอียด</th>
+      <th>รวม</th><th>เก็บได้</th><th>ค่าใช้จ่าย</th><th>สุทธิ</th><th></th>
+    </tr></thead>
+    <tbody>${bodyRows}</tbody>
+    <tfoot><tr class="total-row">
+      <td>รวมเดือน</td>
+      <td>${tTs||'–'}</td><td>${tTl||'–'}</td><td>${tCc||'–'}</td><td>${tCf||'–'}</td>
+      <td>${tBags}</td><td>฿${tActual.toLocaleString()}</td><td>฿${tExp.toLocaleString()}</td><td>฿${tNet.toLocaleString()}</td><td></td>
+    </tr></tfoot>
+  </table></div>`;
 }
 
 // ── Sidebar ──
