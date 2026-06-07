@@ -337,13 +337,15 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 .dl-rpt-card.red .v{color:#dc2626;}
 
 /* ── Delivery Mode ── */
+/* mobile */
 #deliveryScreen{position:fixed;inset:0;z-index:150;background:#f5f5f5;display:none;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
 #deliveryScreen.open{display:flex;transform:translateX(0);}
-/* mobile: dlv-inner fills the screen */
-.dlv-inner{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.dlv-inner{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;}
+/* desktop: centered card */
 @media(min-width:640px){
-  #deliveryScreen{background:rgba(0,0,0,.5);align-items:center;justify-content:center;}
-  .dlv-inner{flex:none;width:480px;height:90vh;max-height:700px;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.3);}
+  #deliveryScreen{background:rgba(0,0,0,.55);flex-direction:row;align-items:center;justify-content:center;transform:none;transition:none;opacity:0;pointer-events:none;}
+  #deliveryScreen.open{display:flex;opacity:1;pointer-events:auto;}
+  .dlv-inner{flex:none;width:460px;height:88vh;max-height:720px;border-radius:22px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 48px rgba(0,0,0,.35);background:#f5f5f5;}
 }
 .dlv-header{background:#fff;border-bottom:1px solid #ebebeb;padding:12px 16px;display:flex;align-items:center;gap:10px;}
 .dlv-title{flex:1;font-size:.9rem;font-weight:700;}
