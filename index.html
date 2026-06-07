@@ -516,6 +516,10 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
   </div>
   <div class="sb-panel active" id="sbPanel0">
     <div id="sbRouteList"><div style="padding:20px;text-align:center;color:#aaa;font-size:.82rem">กำลังโหลด...</div></div>
+    <div style="border-top:1px solid #f0f0f0;padding-top:10px;margin-top:4px;display:flex;flex-direction:column;gap:6px;">
+      <button onclick="openRunHist();closeSidebar();" style="width:100%;background:#f0f7ff;color:#2563eb;border:none;border-radius:12px;padding:11px;font-family:'Sarabun',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;text-align:left;">🚚 ประวัติวิ่งสาย</button>
+      <button onclick="showHistory();closeSidebar();" style="width:100%;background:#f5f5f5;color:#555;border:none;border-radius:12px;padding:11px;font-family:'Sarabun',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;text-align:left;">📋 ดูทุกสาย</button>
+    </div>
   </div>
   <div class="sb-panel" id="sbPanel1">
     <div style="padding:8px 0">
@@ -536,8 +540,6 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
     <div class="rs-header">
       <span class="rs-label">เลือกสายวันนี้</span>
       <div style="display:flex;gap:8px;">
-        <button class="btn-add-route" style="background:#f0f0f0;color:#555;" onclick="openRunHist()">🚚 ประวัติวิ่งสาย</button>
-        <button class="btn-add-route" style="background:#f0f0f0;color:#555;" onclick="showHistory()">📋 ดูทุกสาย</button>
         <button class="btn-add-route" style="background:#f0f0f0;color:#555;" id="btnEditMode" onclick="toggleEditMode()">✏️ แก้ไข</button>
         <button class="btn-add-route" id="btnAddRoute" style="display:none" onclick="addRoute()">+ เพิ่มสาย</button>
       </div>
@@ -672,10 +674,10 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 
 <!-- Main App -->
 <header id="mainHeader" style="display:none">
+  <button onclick="changeRoute()" style="background:none;border:none;cursor:pointer;font-size:1.1rem;padding:4px 8px;color:#555;">←</button>
+  <div class="hdr-brand">🧊 <span id="routeBadge" style="font-weight:700">–</span></div>
+  <span class="hdr-count" id="hdrCount" style="font-size:.75rem">0 ร้าน</span>
   <button class="btn-menu" onclick="openSidebar()">☰</button>
-  <div class="hdr-brand" style="font-size:.95rem">🧊 <span id="routeBadge" style="font-weight:700">–</span></div>
-  <span class="hdr-count" id="hdrCount">0 ร้าน</span>
-  <button onclick="changeRoute()" style="background:none;border:none;cursor:pointer;font-size:.8rem;padding:4px 8px;color:#888;font-family:'Sarabun',sans-serif;">เปลี่ยนสาย</button>
 </header>
 <div id="syncBar" style="display:none"></div>
 
@@ -688,7 +690,8 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
   </div>
 
   <!-- Add form -->
-  <div class="card">
+  <button id="btnToggleAddForm" onclick="toggleAddForm()" style="width:100%;background:#f0f7ff;color:#2563eb;border:1.5px dashed #93c5fd;border-radius:14px;padding:12px;font-family:'Sarabun',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;margin-bottom:12px;">+ เพิ่มร้านใหม่</button>
+  <div class="card" id="addFormCard" style="display:none">
     <div class="card-title">เพิ่มร้าน</div>
 
     <div class="photo-zone" id="photoZone">
@@ -733,7 +736,7 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
     <input class="field-input" type="text" id="shopNote" placeholder="หมายเหตุ (ถ้ามี)...">
 
     <button class="btn-primary" onclick="addShop()">+ เพิ่มร้านนี้</button>
-  </div>
+  </div><!-- end addFormCard -->
 
   <!-- List -->
   <div class="section-lbl">รายการร้าน</div>
@@ -922,11 +925,16 @@ function renderRouteList(routes,cnt={}){
       <span class="route-cnt ${cnt[r.name]?'has':''}">${cnt[r.name]?cnt[r.name]+' ร้าน':'ยังว่าง'}</span>
       ${editMode
         ? `<button class="btn-del-route" data-del-route="${r.id}">🗑️</button>`
-        : `<button class="btn-go" data-select-route="${esc(r.name)}">เลือก →</button>`
+        : `<div style="display:flex;gap:6px;">
+            <button class="btn-go" style="background:#f0f0f0;color:#555;font-size:.75rem;padding:6px 10px;" data-select-route="${esc(r.name)}">จัดการ</button>
+            <button class="btn-go" style="background:#3b82f6;" data-run-route="${esc(r.name)}">🚚 วิ่ง</button>
+           </div>`
       }
     </div>`).join('');
   // event delegation — ไม่มี onclick string ใน HTML
   list.addEventListener('click',e=>{
+    const runBtn=e.target.closest('[data-run-route]');
+    if(runBtn){startDeliveryForRoute(runBtn.dataset.runRoute);return;}
     const selBtn=e.target.closest('[data-select-route]');
     if(selBtn){selectRoute(selBtn.dataset.selectRoute);return;}
     const delBtn=e.target.closest('[data-del-route]');
@@ -970,7 +978,28 @@ async function deleteRoute(id,name){
   initRouteList();
 }
 
+function toggleAddForm(open){
+  const card=document.getElementById('addFormCard');
+  const btn=document.getElementById('btnToggleAddForm');
+  const show=open!==undefined?open:card.style.display==='none';
+  card.style.display=show?'block':'none';
+  btn.textContent=show?'✕ ปิดฟอร์ม':'+ เพิ่มร้านใหม่';
+  btn.style.background=show?'#fff7ed':'#f0f7ff';
+  btn.style.color=show?'#d97706':'#2563eb';
+  btn.style.borderColor=show?'#fed7aa':'#93c5fd';
+  if(show)card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
 function selectRoute(n){currentRoute=n;showMain();}
+
+async function startDeliveryForRoute(name){
+  showToast('กำลังโหลดสาย...');
+  const rows=await sbGet('shops',`route_name=eq.${encodeURIComponent(name)}&order=num.asc`);
+  if(!rows.length){showToast('ยังไม่มีร้านในสายนี้');return;}
+  currentRoute=name;
+  shops=rows.map(r=>({id:r.id,num:r.num,name:r.name,price:r.price,hasBonus:r.has_bonus,ice:r.ice,totalQty:r.total_qty,totalBonus:r.total_bonus,totalMoney:r.total_money,gps:r.gps,note:r.note,time:r.time,photo:r.photo_url||null}));
+  startDelivery();
+}
 function changeRoute(){
   shops=[];
   document.getElementById('routeScreen').style.display='flex';
@@ -1100,6 +1129,7 @@ async function addShop(){
   setSync('กำลังบันทึก...');const ok=await saveShop(shop);
   setSync(ok?`บันทึก "${name}" แล้ว`:'บันทึกไม่ได้');setTimeout(()=>setSync(''),2500);
   showToast(`เพิ่ม "${name}" แล้ว`);document.getElementById('btnDone').disabled=false;document.getElementById('btnDelivery').disabled=false;
+  toggleAddForm(false);
 }
 
 async function deleteShop(id){
