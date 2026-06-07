@@ -391,6 +391,66 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 .dlv-finish-stat .l{font-size:.65rem;color:#aaa;margin-top:2px;}
 .dlv-skipped{font-size:.75rem;color:#f59e0b;background:#fffbeb;border-radius:8px;padding:4px 10px;display:inline-block;}
 
+/* ── Run Mode (editable delivery) ── */
+.run-card{background:#fff;border-radius:18px;box-shadow:0 2px 12px rgba(0,0,0,.07);padding:16px;margin-bottom:10px;}
+.run-top-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.run-photo-thumb{width:56px;height:56px;border-radius:10px;object-fit:cover;flex-shrink:0;border:1px solid #ebebeb;}
+.run-photo-empty{width:56px;height:56px;border-radius:10px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
+.run-name-block{flex:1;min-width:0;}
+.run-stop-num{font-size:.68rem;font-weight:700;color:#3b82f6;letter-spacing:.5px;margin-bottom:2px;}
+.run-shop-name{font-size:1.15rem;font-weight:800;color:#1a1a1a;line-height:1.2;}
+.run-shop-name-input{width:100%;border:1.5px solid #3b82f6;border-radius:10px;padding:8px 12px;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;outline:none;margin-bottom:4px;}
+.run-ice-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f5f5f5;}
+.run-ice-row:last-child{border-bottom:none;}
+.run-ice-icon{font-size:1.1rem;width:22px;text-align:center;flex-shrink:0;}
+.run-ice-name{flex:1;font-size:.88rem;font-weight:600;color:#333;}
+.run-ice-input{width:70px;border:1.5px solid #e5e5e5;border-radius:10px;padding:8px 10px;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;text-align:center;outline:none;-moz-appearance:textfield;}
+.run-ice-input::-webkit-outer-spin-button,.run-ice-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.run-ice-input:focus{border-color:#3b82f6;}
+.run-ice-unit{font-size:.78rem;color:#aaa;width:22px;}
+.run-bottom{margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.run-price-wrap{display:flex;align-items:center;gap:6px;background:#f5f5f5;border-radius:10px;padding:6px 10px;}
+.run-price-wrap span{font-size:.78rem;color:#888;}
+.run-price-input{width:52px;border:none;background:transparent;font-family:'Sarabun',sans-serif;font-size:.95rem;font-weight:700;text-align:center;outline:none;-moz-appearance:textfield;}
+.run-price-input::-webkit-outer-spin-button,.run-price-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.run-bonus-chip{display:flex;align-items:center;gap:5px;background:#f5f5f5;border-radius:10px;padding:6px 10px;cursor:pointer;user-select:none;font-size:.82rem;font-weight:600;transition:background .15s;}
+.run-bonus-chip.on{background:#dcfce7;color:#16a34a;}
+.run-money-bar{display:flex;align-items:center;justify-content:space-between;background:#1a1a1a;color:#fff;border-radius:12px;padding:11px 14px;margin-top:12px;}
+.run-money-label{font-size:.78rem;color:#aaa;}
+.run-money-val{font-size:1.2rem;font-weight:800;}
+.run-note-input{width:100%;border:1.5px solid #e5e5e5;border-radius:10px;padding:8px 12px;font-family:'Sarabun',sans-serif;font-size:.88rem;outline:none;margin-top:10px;color:#555;}
+.run-note-input:focus{border-color:#bbb;}
+.btn-run-confirm{flex:2;background:#16a34a;color:#fff;border:none;border-radius:14px;padding:13px;font-family:'Sarabun',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;}
+.btn-run-skip{flex:1;background:#fee2e2;color:#dc2626;border:1.5px solid #fca5a5;border-radius:14px;padding:13px;font-family:'Sarabun',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;}
+.btn-run-prev{background:#fff;color:#555;border:1.5px solid #e5e5e5;border-radius:14px;padding:13px 14px;font-family:'Sarabun',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;}
+.btn-run-addshop{width:100%;background:#f0f7ff;color:#2563eb;border:1.5px dashed #93c5fd;border-radius:14px;padding:11px;font-family:'Sarabun',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;}
+.run-driver-row{display:flex;align-items:center;gap:8px;background:#fff;padding:10px 16px;border-bottom:1px solid #f0f0f0;}
+.run-driver-row span{font-size:.82rem;color:#888;white-space:nowrap;}
+.run-driver-input{flex:1;border:1.5px solid #e5e5e5;border-radius:8px;padding:6px 10px;font-family:'Sarabun',sans-serif;font-size:.88rem;outline:none;}
+/* Run History Screen */
+#runHistScreen{position:fixed;inset:0;z-index:140;background:#f5f5f5;display:none;flex-direction:column;}
+.rh-header{background:#fff;border-bottom:1px solid #ebebeb;padding:13px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;}
+.rh-title{flex:1;font-size:1rem;font-weight:700;}
+.rh-body{flex:1;overflow-y:auto;padding:16px 16px 40px;max-width:560px;width:100%;margin:0 auto;}
+.rh-filter{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.rh-filter input,.rh-filter select{flex:1;min-width:120px;border:1.5px solid #e5e5e5;border-radius:10px;padding:9px 12px;font-family:'Sarabun',sans-serif;font-size:.88rem;outline:none;background:#fff;}
+.rh-session{background:#fff;border:1px solid #ebebeb;border-radius:14px;margin-bottom:10px;overflow:hidden;}
+.rh-session-hdr{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;}
+.rh-session-hdr:hover{background:#fafafa;}
+.rh-session-date{font-size:.95rem;font-weight:700;flex:1;}
+.rh-session-meta{font-size:.75rem;color:#aaa;text-align:right;line-height:1.5;}
+.rh-session-meta b{color:#1a1a1a;font-size:.88rem;}
+.rh-session-body{display:none;border-top:1px solid #f0f0f0;}
+.rh-session-body.open{display:block;}
+.rh-item{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid #f5f5f5;}
+.rh-item:last-child{border-bottom:none;}
+.rh-item.skipped{opacity:.45;}
+.rh-item-num{font-size:.68rem;font-weight:700;color:#bbb;min-width:20px;}
+.rh-item-name{flex:1;font-size:.88rem;font-weight:600;}
+.rh-item-detail{font-size:.72rem;color:#aaa;}
+.rh-item-money{font-size:.82rem;font-weight:700;white-space:nowrap;}
+.rh-month-label{font-size:.72rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin:12px 0 6px;}
+
 /* ── Sidebar ── */
 #sidebarBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;opacity:0;pointer-events:none;transition:opacity .25s;}
 #sidebarBackdrop.open{opacity:1;pointer-events:auto;}
@@ -463,6 +523,7 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
     <div class="rs-header">
       <span class="rs-label">เลือกสายวันนี้</span>
       <div style="display:flex;gap:8px;">
+        <button class="btn-add-route" style="background:#f0f0f0;color:#555;" onclick="openRunHist()">🚚 ประวัติวิ่งสาย</button>
         <button class="btn-add-route" style="background:#f0f0f0;color:#555;" onclick="showHistory()">📋 ดูทุกสาย</button>
         <button class="btn-add-route" style="background:#f0f0f0;color:#555;" id="btnEditMode" onclick="toggleEditMode()">✏️ แก้ไข</button>
         <button class="btn-add-route" id="btnAddRoute" style="display:none" onclick="addRoute()">+ เพิ่มสาย</button>
@@ -679,6 +740,21 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
   </div>
 </div>
 
+<!-- Run History Screen -->
+<div id="runHistScreen">
+  <div class="rh-header">
+    <button onclick="closeRunHist()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:#555;">←</button>
+    <div class="rh-title">📋 ประวัติวิ่งสาย</div>
+  </div>
+  <div class="rh-body">
+    <div class="rh-filter">
+      <input type="month" id="rhMonth">
+      <select id="rhRoute"><option value="">ทุกสาย</option></select>
+    </div>
+    <div id="rhList"><div style="text-align:center;color:#aaa;padding:40px;font-size:.85rem">เลือกเดือนเพื่อดูประวัติ</div></div>
+  </div>
+</div>
+
 <!-- Delivery Mode Screen -->
 <div id="deliveryScreen">
   <div class="dlv-inner">
@@ -686,6 +762,11 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
     <button class="dlv-close" onclick="closeDelivery()">←</button>
     <div class="dlv-title" id="dlvTitle">วิ่งสาย</div>
     <span id="dlvSkippedBadge"></span>
+    <button onclick="openRunHist()" style="background:none;border:none;font-size:.78rem;color:#3b82f6;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;padding:4px 6px;">📋 ประวัติ</button>
+  </div>
+  <div class="run-driver-row">
+    <span>🚚 คนขับ</span>
+    <input class="run-driver-input" id="runDriver" placeholder="ชื่อคนขับวันนี้...">
   </div>
   <div class="dlv-progress-wrap">
     <div class="dlv-progress-bar"><div class="dlv-progress-fill" id="dlvFill" style="width:0%"></div></div>
@@ -789,6 +870,8 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 function nowDate(){return new Date().toLocaleDateString('th-TH');}
 
 document.getElementById('rsDate').textContent=d.toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+document.getElementById('rhMonth').addEventListener('change',loadRunHist);
+document.getElementById('rhRoute').addEventListener('change',loadRunHist);
 
 async function initRouteList(){
   document.getElementById('routeList').innerHTML='<div style="padding:20px;text-align:center;color:#aaa;font-size:.85rem">กำลังโหลด...</div>';
@@ -1299,12 +1382,26 @@ function openRouteFromHistory(routeName){
   showMain();
 }
 
-// ── Delivery Mode ──
+// ── Run Mode (daily delivery recording) ──
 let dlvIdx=0, dlvSkipped=new Set();
+let runItems=[];  // working copy for current run
 
 function startDelivery(){
   if(!shops.length){alert('ยังไม่มีร้านในสายนี้');return;}
   dlvIdx=0; dlvSkipped=new Set();
+  // deep-copy template shops as starting point
+  runItems=shops.map(s=>({
+    shopName:s.name,
+    photo:s.photo||'',
+    gps:s.gps||null,
+    price:s.price||35,
+    ice:{ts:s.ice?.ts||0,tl:s.ice?.tl||0,cc:s.ice?.cc||0,cf:s.ice?.cf||0},
+    hasBonus:s.hasBonus!==false,
+    note:s.note||'',
+    isNew:false,
+    skipped:false,
+    totalQty:0,totalBonus:0,totalMoney:0
+  }));
   document.getElementById('deliveryScreen').classList.add('open');
   document.getElementById('deliveryScreen').style.display='flex';
   renderDlv();
@@ -1317,7 +1414,7 @@ function closeDelivery(){
 }
 
 function renderDlv(){
-  const total=shops.length;
+  const total=runItems.length;
   const done=dlvIdx;
   const pct=total?Math.round(done/total*100):0;
   document.getElementById('dlvFill').style.width=pct+'%';
@@ -1326,133 +1423,260 @@ function renderDlv(){
   document.getElementById('dlvProgCount').textContent=`${done}/${total} จุด`;
   const skip=dlvSkipped.size;
   document.getElementById('dlvSkippedBadge').innerHTML=skip?`<span class="dlv-skipped">ข้าม ${skip}</span>`:'';
-
   if(done>=total){renderDlvFinish();return;}
+  renderRunCard();
+}
 
-  const s=shops[dlvIdx];
-  const iceChips=ICE.filter(ic=>s.ice&&s.ice[ic.k]).map(ic=>{
-    const b=bonus(s.ice[ic.k],s.hasBonus);
-    return`<div class="dlv-ice-chip">
-      <span class="ico">${ic.icon}</span>
-      <span class="nm">${ic.label}</span>
-      <span class="qty">${s.ice[ic.k]} ถุง</span>
-      ${b?`<span class="bns">+${b}</span>`:''}
-    </div>`;
-  }).join('');
+function renderRunCard(){
+  const item=runItems[dlvIdx];
+  const total=runItems.length;
+  const iceRows=ICE.map(ic=>`
+    <div class="run-ice-row">
+      <span class="run-ice-icon">${ic.icon}</span>
+      <span class="run-ice-name">${ic.label}</span>
+      <input class="run-ice-input" type="number" id="ri-${ic.k}" value="${item.ice[ic.k]||0}" min="0" oninput="runCalc()">
+      <span class="run-ice-unit">ถุง</span>
+    </div>`).join('');
 
   document.getElementById('dlvBody').innerHTML=`
-    <div class="dlv-card">
-      <div class="dlv-top-row">
-        ${s.photo
-          ?`<img class="dlv-photo-thumb" src="${esc(s.photo)}" data-photo-url="${esc(s.photo)}" data-photo-label="${esc(s.name)}">`
-          :`<div class="dlv-photo-thumb-empty">🏪</div>`}
-        <div class="dlv-name-block">
-          <div class="dlv-stop-num">📍 จุดที่ ${dlvIdx+1} / ${total}</div>
-          <div class="dlv-shop-name">${esc(s.name)}</div>
-          ${s.gps?`<div style="font-size:.68rem;color:#aaa;margin-top:3px">📌 ${s.gps.lat.toFixed(4)}, ${s.gps.lng.toFixed(4)}</div>`:''}
+    <div class="run-card">
+      <div class="run-top-row">
+        ${item.photo?`<img class="run-photo-thumb" src="${esc(item.photo)}">`:`<div class="run-photo-empty">🏪</div>`}
+        <div class="run-name-block">
+          <div class="run-stop-num">📍 จุดที่ ${dlvIdx+1} / ${total}</div>
+          ${item.isNew
+            ?`<input class="run-shop-name-input" id="ri-name" placeholder="ชื่อร้านใหม่..." value="${esc(item.shopName)}">`
+            :`<div class="run-shop-name">${esc(item.shopName)}</div>`}
         </div>
       </div>
-      <div class="dlv-ice-chips">${iceChips}</div>
-      <div class="dlv-money-row">
-        <span class="dlv-money-label">ยอดรวม</span>
-        <span class="dlv-money-val">฿${s.totalMoney.toLocaleString()}</span>
+      ${iceRows}
+      <div class="run-bottom">
+        <div class="run-price-wrap">
+          <span>฿/ถุง</span>
+          <input class="run-price-input" type="number" id="ri-price" value="${item.price}" min="1" oninput="runCalc()">
+        </div>
+        <div class="run-bonus-chip ${item.hasBonus?'on':''}" id="ri-bonus-chip" onclick="runToggleBonus()">
+          🎁 แถม ${item.hasBonus?'เปิด':'ปิด'}
+        </div>
+        ${item.gps?`<button onclick="navTo(${item.gps.lat},${item.gps.lng})" style="background:#eff6ff;color:#2563eb;border:none;border-radius:10px;padding:6px 10px;font-family:'Sarabun',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;">🧭 นำทาง</button>`:''}
       </div>
-      ${s.note?`<div class="dlv-note">💬 ${esc(s.note)}</div>`:''}
+      <div class="run-money-bar">
+        <span class="run-money-label">ยอดรวม</span>
+        <span class="run-money-val" id="riTotal">฿0</span>
+      </div>
+      <input class="run-note-input" id="ri-note" type="text" placeholder="หมายเหตุ..." value="${esc(item.note||'')}">
     </div>`;
-  // photo click
-  const thumb=document.querySelector('[data-photo-url]');
-  if(thumb)thumb.addEventListener('click',()=>viewPhotoUrl(thumb.dataset.photoUrl,thumb.dataset.photoLabel));
-
+  runCalc();
   document.getElementById('dlvFooter').innerHTML=`
-    ${s.gps?`<button class="btn-dlv-nav" onclick="navTo(${s.gps.lat},${s.gps.lng})">🧭 นำทางไปร้านนี้</button>`:''}
+    <button class="btn-run-addshop" onclick="runAddShop()">+ เพิ่มร้านใหม่ที่ไม่อยู่ในสาย</button>
     <div class="dlv-row2">
-      ${dlvIdx>0?`<button class="btn-dlv-prev" onclick="dlvPrev()">← ย้อน</button>`:''}
-      <button class="btn-dlv-skip" onclick="dlvSkip()">ข้าม</button>
-      <button class="btn-dlv-next" onclick="dlvNext()">ส่งแล้ว ✓ &nbsp;ต่อไป →</button>
+      ${dlvIdx>0?`<button class="btn-run-prev" onclick="dlvPrev()">← ย้อน</button>`:''}
+      <button class="btn-run-skip" onclick="dlvSkip()">ข้าม</button>
+      <button class="btn-run-confirm" onclick="dlvNext()">ส่งแล้ว ✓ ต่อไป →</button>
     </div>`;
 }
 
+function runCalc(){
+  const price=parseInt(document.getElementById('ri-price')?.value)||0;
+  const chip=document.getElementById('ri-bonus-chip');
+  const bon=chip?.classList.contains('on')||false;
+  let qty=0;
+  ICE.forEach(ic=>{qty+=parseInt(document.getElementById('ri-'+ic.k)?.value)||0;});
+  const b=bonus(qty,bon);
+  const money=(qty-b)*price;
+  const el=document.getElementById('riTotal');
+  if(el)el.textContent='฿'+money.toLocaleString();
+}
+
+function runToggleBonus(){
+  const chip=document.getElementById('ri-bonus-chip');
+  if(!chip)return;
+  chip.classList.toggle('on');
+  chip.textContent='🎁 แถม '+(chip.classList.contains('on')?'เปิด':'ปิด');
+  runCalc();
+}
+
+function runSaveCurrentItem(){
+  const item=runItems[dlvIdx];
+  if(item.isNew&&document.getElementById('ri-name'))
+    item.shopName=document.getElementById('ri-name').value.trim()||'ร้านใหม่';
+  item.price=parseInt(document.getElementById('ri-price')?.value)||item.price;
+  item.hasBonus=document.getElementById('ri-bonus-chip')?.classList.contains('on')??item.hasBonus;
+  item.note=document.getElementById('ri-note')?.value||'';
+  ICE.forEach(ic=>{item.ice[ic.k]=parseInt(document.getElementById('ri-'+ic.k)?.value)||0;});
+  item.totalQty=ICE.reduce((a,ic)=>a+(item.ice[ic.k]||0),0);
+  item.totalBonus=bonus(item.totalQty,item.hasBonus);
+  item.totalMoney=(item.totalQty-item.totalBonus)*item.price;
+}
+
+function runAddShop(){
+  runSaveCurrentItem();
+  runItems.push({shopName:'',photo:'',gps:null,price:35,ice:{ts:0,tl:0,cc:0,cf:0},hasBonus:true,note:'',isNew:true,skipped:false,totalQty:0,totalBonus:0,totalMoney:0});
+  dlvIdx=runItems.length-1;
+  renderDlv();
+  document.getElementById('dlvBody').scrollTop=0;
+}
+
 function renderDlvFinish(){
-  const total=shops.length, skip=dlvSkipped.size, done=total-skip;
-  const tMoney=shops.filter((_,i)=>!dlvSkipped.has(i)).reduce((a,s)=>a+s.totalMoney,0);
-  const tQty=shops.filter((_,i)=>!dlvSkipped.has(i)).reduce((a,s)=>a+s.totalQty,0);
+  const skip=dlvSkipped.size;
+  const confirmed=runItems.filter((_,i)=>!dlvSkipped.has(i));
+  const tMoney=confirmed.reduce((a,s)=>a+s.totalMoney,0);
+  const tQty=confirmed.reduce((a,s)=>a+s.totalQty,0);
   document.getElementById('dlvBody').innerHTML=`
     <div class="dlv-finish">
       <div class="dlv-finish-icon">🎉</div>
       <h2>วิ่งสายเสร็จแล้ว!</h2>
-      <p>${currentRoute}<br>${new Date().toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long'})}</p>
+      <p>${esc(currentRoute)}<br>${new Date().toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long'})}</p>
       <div class="dlv-finish-stats">
-        <div class="dlv-finish-stat"><div class="v">${done}</div><div class="l">ร้านที่ส่ง</div></div>
+        <div class="dlv-finish-stat"><div class="v">${confirmed.length}</div><div class="l">ร้านที่ส่ง</div></div>
         <div class="dlv-finish-stat"><div class="v">${tQty}</div><div class="l">ถุงรวม</div></div>
-        <div class="dlv-finish-stat money"><div class="v">${tMoney.toLocaleString()}</div><div class="l">บาท</div></div>
+        <div class="dlv-finish-stat"><div class="v">${tMoney.toLocaleString()}</div><div class="l">บาท</div></div>
       </div>
       ${skip?`<div class="dlv-skipped">ข้าม ${skip} ร้าน</div>`:''}
+      <div id="runSaveStatus" style="font-size:.82rem;color:#aaa;min-height:20px"></div>
     </div>`;
   document.getElementById('dlvFooter').innerHTML=`
-    <button class="btn-dlv-nav" onclick="closeDelivery();showReport()">🗺️ ดูสรุปทั้งสาย</button>
-    <button class="btn-dlv-skip" style="width:100%;margin-top:0" onclick="closeDelivery()">กลับหน้าหลัก</button>`;
+    <button class="btn-dlv-nav" id="btnSaveRun" onclick="saveRun()">💾 บันทึกยอดวันนี้</button>
+    <button class="btn-dlv-skip" style="width:100%" onclick="closeDelivery()">กลับหน้าหลัก</button>`;
+}
+
+async function saveRun(){
+  const btn=document.getElementById('btnSaveRun');
+  if(btn)btn.disabled=true;
+  const driver=(document.getElementById('runDriver')?.value||'').trim();
+  const skip=dlvSkipped.size;
+  const confirmed=runItems.filter((_,i)=>!dlvSkipped.has(i));
+  const tMoney=confirmed.reduce((a,s)=>a+s.totalMoney,0);
+  const tQty=confirmed.reduce((a,s)=>a+s.totalQty,0);
+  const runDate=today();
+  // 1. insert session
+  const res=await fetch(`${SUPA_URL}/rest/v1/run_sessions`,{
+    method:'POST',
+    headers:{...H,'Prefer':'return=representation'},
+    body:JSON.stringify({route_name:currentRoute,run_date:runDate,driver,total_qty:tQty,total_money:tMoney,shop_count:confirmed.length,skipped_count:skip})
+  });
+  if(!res.ok){const e=await res.json().catch(()=>({}));showToast('❌ '+(e.message||e.hint||res.status));if(btn)btn.disabled=false;return;}
+  const [session]=await res.json();
+  // 2. insert items
+  const items=runItems.map((it,i)=>({session_id:session.id,seq:i+1,shop_name:it.shopName,price:it.price,ice:it.ice,has_bonus:it.hasBonus,total_qty:it.totalQty,total_bonus:it.totalBonus,total_money:it.totalMoney,note:it.note,is_new:it.isNew,skipped:dlvSkipped.has(i)}));
+  const res2=await fetch(`${SUPA_URL}/rest/v1/run_items`,{method:'POST',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify(items)});
+  if(!res2.ok){const e=await res2.json().catch(()=>({}));showToast('❌ '+(e.message||e.hint||res2.status));if(btn)btn.disabled=false;return;}
+  const st=document.getElementById('runSaveStatus');
+  if(st)st.innerHTML='<span style="color:#16a34a;font-weight:700">✅ บันทึกแล้ว!</span>';
+  if(btn){btn.textContent='✅ บันทึกแล้ว';btn.style.background='#16a34a';}
+  showToast('✅ บันทึกยอดวิ่งสายแล้ว');
 }
 
 function dlvNext(){
+  runSaveCurrentItem();
   const nextIdx=dlvIdx+1;
-  // ถ้าจะจบสาย และมีร้านที่ข้าม → ถามยืนยันก่อน
-  if(nextIdx>=shops.length && dlvSkipped.size>0){
-    renderDlvConfirm();
-    return;
-  }
-  dlvIdx=Math.min(nextIdx, shops.length);
+  if(nextIdx>=runItems.length && dlvSkipped.size>0){renderDlvConfirm();return;}
+  dlvIdx=Math.min(nextIdx,runItems.length);
   renderDlv();
   document.getElementById('dlvBody').scrollTop=0;
 }
 
 function renderDlvConfirm(){
-  const skippedShops=shops.filter((_,i)=>dlvSkipped.has(i));
+  const skippedList=runItems.filter((_,i)=>dlvSkipped.has(i));
   document.getElementById('dlvBody').innerHTML=`
-    <div class="dlv-card">
+    <div class="run-card">
       <div style="text-align:center;padding:8px 0 16px">
         <div style="font-size:2.5rem">⚠️</div>
         <div style="font-size:1.1rem;font-weight:800;margin:8px 0 4px">ยืนยันจบสาย?</div>
-        <div style="font-size:.85rem;color:#888">มีร้านที่ยังไม่ได้ส่ง ${skippedShops.length} ร้าน</div>
+        <div style="font-size:.85rem;color:#888">มีร้านที่ยังไม่ได้ส่ง ${skippedList.length} ร้าน</div>
       </div>
-      <div style="background:#fff7ed;border-radius:12px;padding:12px 14px;margin-bottom:4px">
+      <div style="background:#fff7ed;border-radius:12px;padding:12px 14px">
         <div style="font-size:.75rem;font-weight:700;color:#f59e0b;margin-bottom:8px">🏪 ร้านที่ข้าม</div>
-        ${skippedShops.map(s=>`
-          <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #fef3c7">
-            <span style="font-size:.75rem;color:#aaa;min-width:20px">#${s.num}</span>
-            <span style="flex:1;font-size:.88rem;font-weight:600">${s.name}</span>
-            <span style="font-size:.78rem;font-weight:700;color:#f59e0b">฿${s.totalMoney.toLocaleString()}</span>
-          </div>`).join('')}
+        ${skippedList.map(s=>`<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #fef3c7;font-size:.88rem"><span style="flex:1;font-weight:600">${esc(s.shopName)}</span></div>`).join('')}
       </div>
     </div>`;
   document.getElementById('dlvFooter').innerHTML=`
-    <button class="btn-dlv-next" onclick="dlvConfirmFinish()" style="background:#16a34a">✅ ยืนยัน จบสายเลย</button>
-    <div class="dlv-row2">
-      <button class="btn-dlv-skip" onclick="dlvBackFromConfirm()" style="flex:1;background:#f0f0f0;color:#555;border-color:#e5e5e5">← กลับไปแก้</button>
-    </div>`;
+    <button class="btn-run-confirm" onclick="dlvConfirmFinish()">✅ ยืนยัน จบสายเลย</button>
+    <div class="dlv-row2"><button class="btn-run-skip" onclick="dlvBackFromConfirm()" style="flex:1;background:#f0f0f0;color:#555;border:1.5px solid #e5e5e5">← กลับไปแก้</button></div>`;
   document.getElementById('dlvBody').scrollTop=0;
 }
 
-function dlvConfirmFinish(){
-  dlvIdx=shops.length;
-  renderDlvFinish();
+function dlvConfirmFinish(){dlvIdx=runItems.length;renderDlv();}
+function dlvBackFromConfirm(){dlvIdx=Math.max(dlvIdx-1,0);renderDlv();document.getElementById('dlvBody').scrollTop=0;}
+function dlvPrev(){dlvIdx=Math.max(dlvIdx-1,0);dlvSkipped.delete(dlvIdx);renderDlv();document.getElementById('dlvBody').scrollTop=0;}
+function dlvSkip(){dlvSkipped.add(dlvIdx);dlvIdx=Math.min(dlvIdx+1,runItems.length);renderDlv();document.getElementById('dlvBody').scrollTop=0;}
+
+// ── Run History ──
+function openRunHist(){
+  const s=document.getElementById('runHistScreen');
+  s.style.display='flex';
+  // populate route dropdown
+  const sel=document.getElementById('rhRoute');
+  sel.innerHTML='<option value="">ทุกสาย</option>';
+  // set default month
+  const n=new Date();
+  document.getElementById('rhMonth').value=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+  loadRunHist();
+  // populate routes
+  fetch(`${SUPA_URL}/rest/v1/routes?select=name&order=sort_order`,{headers:H}).then(r=>r.json()).then(rows=>{
+    rows.forEach(r=>{const o=document.createElement('option');o.value=r.name;o.textContent=r.name;sel.appendChild(o);});
+  }).catch(()=>{});
 }
 
-function dlvBackFromConfirm(){
-  dlvIdx=Math.max(dlvIdx-1,0);
-  renderDlv();
-  document.getElementById('dlvBody').scrollTop=0;
+function closeRunHist(){document.getElementById('runHistScreen').style.display='none';}
+
+async function loadRunHist(){
+  const month=document.getElementById('rhMonth').value;
+  const route=document.getElementById('rhRoute').value;
+  const list=document.getElementById('rhList');
+  list.innerHTML='<div style="text-align:center;color:#aaa;padding:20px;font-size:.85rem">กำลังโหลด...</div>';
+  if(!month){list.innerHTML='<div style="text-align:center;color:#aaa;padding:20px;font-size:.85rem">เลือกเดือนก่อน</div>';return;}
+  const [y,m]=month.split('-');
+  const from=`${y}-${m}-01`;
+  const lastDay=new Date(+y,+m,0).getDate();
+  const to=`${y}-${m}-${String(lastDay).padStart(2,'0')}`;
+  let url=`${SUPA_URL}/rest/v1/run_sessions?select=*,run_items(*)&run_date=gte.${from}&run_date=lte.${to}&order=run_date.desc,created_at.desc`;
+  if(route)url+=`&route_name=eq.${encodeURIComponent(route)}`;
+  const res=await fetch(url,{headers:H});
+  if(!res.ok){list.innerHTML='<div style="text-align:center;color:#e00;padding:20px;font-size:.85rem">โหลดข้อมูลไม่ได้</div>';return;}
+  const sessions=await res.json();
+  if(!sessions.length){list.innerHTML='<div style="text-align:center;color:#aaa;padding:40px;font-size:.85rem">ไม่มีข้อมูลในเดือนนี้</div>';return;}
+  // monthly totals
+  const mQty=sessions.reduce((a,s)=>a+s.total_qty,0);
+  const mMoney=sessions.reduce((a,s)=>a+s.total_money,0);
+  list.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+      <div style="background:#fff;border-radius:12px;padding:12px;text-align:center;border:1px solid #ebebeb">
+        <div style="font-size:1.3rem;font-weight:800">${mQty.toLocaleString()}</div>
+        <div style="font-size:.68rem;color:#aaa;margin-top:2px">ถุงรวมเดือนนี้</div>
+      </div>
+      <div style="background:#1a1a1a;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:1.3rem;font-weight:800;color:#fff">฿${mMoney.toLocaleString()}</div>
+        <div style="font-size:.68rem;color:#aaa;margin-top:2px">ยอดรวมเดือนนี้</div>
+      </div>
+    </div>
+    ${sessions.map(s=>rhSessionCard(s)).join('')}`;
 }
-function dlvPrev(){
-  dlvIdx=Math.max(dlvIdx-1,0);
-  dlvSkipped.delete(dlvIdx);
-  renderDlv();
-  document.getElementById('dlvBody').scrollTop=0;
-}
-function dlvSkip(){
-  dlvSkipped.add(dlvIdx);
-  dlvIdx=Math.min(dlvIdx+1, shops.length);
-  renderDlv();
-  document.getElementById('dlvBody').scrollTop=0;
+
+function rhSessionCard(s){
+  const uid='rh'+s.id;
+  const items=(s.run_items||[]).sort((a,b)=>a.seq-b.seq);
+  const rows=items.map(it=>`
+    <div class="rh-item${it.skipped?' skipped':''}">
+      <span class="rh-item-num">${it.seq}</span>
+      <div style="flex:1;min-width:0">
+        <div class="rh-item-name">${esc(it.shop_name)}${it.is_new?' <span style="font-size:.65rem;background:#fef3c7;color:#d97706;border-radius:4px;padding:1px 5px">ใหม่</span>':''}</div>
+        <div class="rh-item-detail">${ICE.filter(ic=>it.ice&&it.ice[ic.k]).map(ic=>`${ic.icon}${it.ice[ic.k]}`).join(' · ')}${it.note?' · '+esc(it.note):''}</div>
+      </div>
+      <div class="rh-item-money">${it.skipped?'ข้าม':'฿'+it.total_money.toLocaleString()}</div>
+    </div>`).join('');
+  const d=new Date(s.run_date+'T00:00:00');
+  const dateStr=d.toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'});
+  return`<div class="rh-session">
+    <div class="rh-session-hdr" onclick="document.getElementById('${uid}').classList.toggle('open')">
+      <div>
+        <div class="rh-session-date">${esc(s.route_name)} · ${dateStr}</div>
+        ${s.driver?`<div style="font-size:.72rem;color:#aaa">🚚 ${esc(s.driver)}</div>`:''}
+      </div>
+      <div class="rh-session-meta">${s.shop_count} ร้าน · ${s.total_qty} ถุง${s.skipped_count?` · ข้าม ${s.skipped_count}`:''}<br><b>฿${s.total_money.toLocaleString()}</b></div>
+    </div>
+    <div class="rh-session-body" id="${uid}">${rows}</div>
+  </div>`;
 }
 
 // ── Daily Log ──
