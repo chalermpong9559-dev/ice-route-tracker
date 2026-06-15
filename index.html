@@ -1378,8 +1378,10 @@ function lmUpdateNextCard(pts){
   const distEl=document.getElementById('lmNextDist');
   if(lmUserPos){distEl.textContent='📍 ห่าง '+lmFmtDist(lmDist(lmUserPos,target.gps));}
   else distEl.textContent='รอตำแหน่ง GPS...';
-  document.getElementById('lmNextNav').onclick=()=>navAllGoogle(target);
-  document.getElementById('lmNavStart').onclick=()=>startNav(target);
+  // "นำทางทั้งสาย" เริ่มที่ร้านที่ 1 เสมอ (ร้านแรกที่ยังไม่ข้าม) แล้วไล่ไปตามลำดับสาย
+  const firstStop=pts.find(p=>!p.skipped)||pts[0]||target;
+  document.getElementById('lmNextNav').onclick=()=>navAllGoogle(firstStop);
+  document.getElementById('lmNavStart').onclick=()=>startNav(firstStop);
   // draw line user→target
   if(lmLine){lmMap.removeLayer(lmLine);lmLine=null;}
   if(lmUserPos){
