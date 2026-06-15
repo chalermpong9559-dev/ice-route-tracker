@@ -807,8 +807,8 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
       <div class="lm-next-dist" id="lmNextDist">–</div>
     </div>
     <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
-      <button class="lm-nav-start" id="lmNavStart">▶️ นำทาง</button>
-      <button class="lm-next-nav" id="lmNextNav">Google</button>
+      <button class="lm-nav-start" id="lmNavStart">🚚 นำทางทั้งสาย</button>
+      <button class="lm-next-nav" id="lmNextNav">🗺️ Google ทั้งสาย</button>
     </div>
   </div>
 </div>
@@ -1261,6 +1261,24 @@ function updateStats(){
 
 function navTo(lat,lng){window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`,'_blank');}
 
+// เปิด Google Maps นำทางทั้งสาย (หลายจุดเรียงกัน ไล่ทีละร้าน)
+function navAllGoogle(target){
+  let si=lmPts.indexOf(target);if(si<0)si=0;
+  let stops=lmPts.slice(si).filter(p=>p.gps&&!p.skipped);
+  if(!stops.length){showToast('ไม่มีร้านให้นำทาง');return;}
+  // Google Maps จำกัดจุดแวะ ~9 ต่อลิงก์ → ส่งทีละ 10 ร้าน
+  const MAX=10;const totalLeft=stops.length;
+  if(stops.length>MAX)stops=stops.slice(0,MAX);
+  const useGps=!!lmUserPos;
+  const origin=useGps?`${lmUserPos.lat},${lmUserPos.lng}`:`${stops[0].gps.lat},${stops[0].gps.lng}`;
+  const dest=stops[stops.length-1].gps;
+  const mids=(useGps?stops.slice(0,-1):stops.slice(1,-1)).map(p=>`${p.gps.lat},${p.gps.lng}`);
+  let url=`https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest.lat},${dest.lng}&travelmode=driving`;
+  if(mids.length)url+=`&waypoints=${mids.join('%7C')}`;
+  if(totalLeft>MAX)showToast(`เปิด Google Maps 10 ร้านแรก (เหลือ ${totalLeft-MAX} ร้าน ครบแล้วกดอีกที)`);
+  window.open(url,'_blank');
+}
+
 // ── Live Map (in-app, real-time position) ──
 let lmMap=null,lmUserMarker=null,lmLine=null,lmWatchId=null,lmMarkers=[],lmFollow=true,lmUserPos=null;
 
@@ -1277,6 +1295,7 @@ function openLiveMap(){
   const src=(typeof runItems!=='undefined'&&runItems.length)?runItems:shops;
   const pts=src.map((s,i)=>({i,name:s.shopName||s.name,gps:s.gps,skipped:typeof dlvSkipped!=='undefined'&&dlvSkipped.has(i)})).filter(p=>p.gps&&p.gps.lat);
   if(!pts.length){showToast('ยังไม่มีร้านที่ปักหมุด GPS');return;}
+  lmPts=pts;
   document.getElementById('liveMapScreen').style.display='flex';
   document.getElementById('lmTitle').textContent=(currentRoute||'แผนที่สด')+' · '+pts.length+' จุด';
   lmFollow=true;
@@ -1348,7 +1367,7 @@ function lmUpdateNextCard(pts){
   const distEl=document.getElementById('lmNextDist');
   if(lmUserPos){distEl.textContent='📍 ห่าง '+lmFmtDist(lmDist(lmUserPos,target.gps));}
   else distEl.textContent='รอตำแหน่ง GPS...';
-  document.getElementById('lmNextNav').onclick=()=>navTo(target.gps.lat,target.gps.lng);
+  document.getElementById('lmNextNav').onclick=()=>navAllGoogle(target);
   document.getElementById('lmNavStart').onclick=()=>startNav(target);
   // draw line user→target
   if(lmLine){lmMap.removeLayer(lmLine);lmLine=null;}
@@ -1371,6 +1390,7 @@ function closeLiveMap(){
 
 // ── In-app Turn-by-turn Navigation (OSRM + Web Speech) ──
 let navActive=false,navTarget=null,navSteps=[],navStepIdx=0,navRouteLine=null,navRouteCoords=[],navArrived=false,navRerouteAt=0;
+let navQueue=[],navQIdx=0,lmPts=[];
 
 function speak(text){
   if(!('speechSynthesis' in window)||!text)return;
@@ -1419,6 +1439,11 @@ async function fetchRoute(from,to){
 
 async function startNav(target){
   if(!lmUserPos){showToast('รอจับตำแหน่ง GPS ก่อน');return;}
+  // สร้างคิวร้าน: เริ่มจากร้านที่เลือก แล้วไล่ไปทุกร้านที่เหลือ (ข้ามร้านที่ skip) ตามลำดับสาย
+  let si=lmPts.indexOf(target);if(si<0)si=0;
+  navQueue=lmPts.slice(si).filter(p=>!p.skipped);
+  if(!navQueue.length)navQueue=[target];
+  navQIdx=0;target=navQueue[0];
   navTarget=target;navArrived=false;navStepIdx=0;navRerouteAt=0;
   document.getElementById('lmNextCard').classList.add('hidden');
   const banner=document.getElementById('lmNavBanner');
@@ -1469,9 +1494,19 @@ function navTick(first){
     navArrived=true;
     document.getElementById('lmNavArrow').textContent='🏁';
     document.getElementById('lmNavDist').textContent='ถึงแล้ว';
-    document.getElementById('lmNavInstr').textContent='ถึงร้าน '+(navTarget.name||'')+' แล้ว';
-    speak('ถึงร้าน '+(navTarget.name||'')+' แล้ว');
-    setTimeout(()=>{if(navArrived)stopNav();},4000);
+    const more=navQIdx<navQueue.length-1;
+    if(more){
+      // ไปต่อร้านถัดไปอัตโนมัติ
+      const nextStop=navQueue[navQIdx+1];
+      document.getElementById('lmNavInstr').textContent='ถึง '+(navTarget.name||'')+' แล้ว → ไปต่อ '+(nextStop.name||'');
+      speak('ถึงร้าน '+(navTarget.name||'')+' แล้ว ไปต่อร้านถัดไป '+(nextStop.name||''));
+      navQIdx++;navTarget=nextStop;navArrived=false;navStepIdx=0;
+      navBuild(lmUserPos,navTarget.gps).catch(()=>navFallback());
+    }else{
+      document.getElementById('lmNavInstr').textContent='ถึงร้านสุดท้ายแล้ว — ครบทั้งสาย 🎉';
+      speak('ถึงร้านสุดท้ายแล้ว นำทางครบทั้งสาย');
+      setTimeout(()=>{if(navArrived)stopNav();},4000);
+    }
     return;
   }
   // โหมด fallback (ไม่มี steps) → อัปเดตระยะตรง
