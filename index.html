@@ -1796,6 +1796,7 @@ function startDelivery(){
   dlvIdx=0; dlvSkipped=new Set();
   // deep-copy template shops as starting point
   runItems=shops.map(s=>({
+    id:s.id,
     shopName:s.name,
     photo:s.photo||'',
     gps:s.gps||null,
@@ -1846,13 +1847,20 @@ function renderRunCard(){
   document.getElementById('dlvBody').innerHTML=`
     <div class="run-card">
       <div class="run-top-row">
-        ${item.photo?`<img class="run-photo-thumb" src="${esc(item.photo)}">`:`<div class="run-photo-empty">🏪</div>`}
+        ${item.photo?`<img class="run-photo-thumb" id="riThumb" src="${esc(item.photo)}">`:`<div class="run-photo-empty" id="riThumb">🏪</div>`}
         <div class="run-name-block">
           <div class="run-stop-num">📍 จุดที่ ${dlvIdx+1} / ${total}</div>
           ${item.isNew
             ?`<input class="run-shop-name-input" id="ri-name" placeholder="ชื่อร้านใหม่..." value="${esc(item.shopName)}">`
             :`<div class="run-shop-name">${esc(item.shopName)}</div>`}
         </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <label id="riPhotoBtn" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;background:#f5f5f5;border:1.5px solid #e5e5e5;border-radius:10px;padding:9px;font-size:.82rem;font-weight:700;color:#555;cursor:pointer">
+          <span id="riPhotoTxt">📷 ${item.photo?'มีรูป ✓':'ถ่ายรูป'}</span>
+          <input type="file" accept="image/*" capture="environment" style="display:none" onchange="runCapturePhoto(event)">
+        </label>
+        <button id="riGpsBtn" onclick="runCaptureGPS()" style="flex:1;background:#f5f5f5;border:1.5px solid #e5e5e5;border-radius:10px;padding:9px;font-family:'Sarabun',sans-serif;font-size:.82rem;font-weight:700;color:${item.gps?'#16a34a':'#555'};cursor:pointer">📍 ${item.gps?'มีพิกัด ✓':'จับพิกัด'}</button>
       </div>
       ${iceRows}
       <div class="run-bottom">
@@ -1904,6 +1912,45 @@ function runToggleBonus(){
   runCalc();
 }
 
+// ระหว่างวิ่งสาย: จับพิกัดร้านนี้ → อัปเดตเข้าสาย (template) ถ้าเป็นร้านเดิม
+function runCaptureGPS(){
+  if(!navigator.geolocation){showToast('อุปกรณ์ไม่รองรับ GPS');return;}
+  const btn=document.getElementById('riGpsBtn');
+  if(btn)btn.textContent='📍 กำลังจับ...';
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const item=runItems[dlvIdx];
+    item.gps={lat:pos.coords.latitude,lng:pos.coords.longitude,acc:Math.round(pos.coords.accuracy)};
+    if(btn){btn.textContent='📍 มีพิกัด ✓';btn.style.color='#16a34a';}
+    showToast('✅ จับพิกัดแล้ว (±'+item.gps.acc+'ม.)');
+    if(item.id)fetch(`${SUPA_URL}/rest/v1/shops?id=eq.${item.id}`,{method:'PATCH',headers:H,body:JSON.stringify({gps:item.gps})});
+  },err=>{
+    if(btn){btn.textContent='📍 จับพิกัด';}
+    showToast('❌ จับพิกัดไม่ได้ — เปิด GPS หรือยัง?');
+  },{enableHighAccuracy:true,timeout:10000});
+}
+
+// ระหว่างวิ่งสาย: ถ่ายรูปร้านนี้ → อัปเดตเข้าสาย (template) ถ้าเป็นร้านเดิม
+function runCapturePhoto(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=async ev=>{
+    const item=runItems[dlvIdx];
+    item.photo=ev.target.result;
+    const thumb=document.getElementById('riThumb');
+    if(thumb)thumb.outerHTML=`<img class="run-photo-thumb" id="riThumb" src="${item.photo}">`;
+    const txt=document.getElementById('riPhotoTxt');if(txt)txt.textContent='📷 มีรูป ✓';
+    showToast('✅ ถ่ายรูปแล้ว');
+    if(item.id){
+      const url=await uploadPhoto(item.id,item.photo);
+      const finalUrl=url||item.photo;
+      item.photo=finalUrl;
+      if(!url)showToast('⚠️ อัพ storage ไม่ได้ — เก็บรูปในข้อมูลแทน');
+      fetch(`${SUPA_URL}/rest/v1/shops?id=eq.${item.id}`,{method:'PATCH',headers:H,body:JSON.stringify({photo_url:finalUrl})});
+    }
+  };
+  r.readAsDataURL(f);
+}
+
 function runSaveCurrentItem(){
   const item=runItems[dlvIdx];
   if(item.isNew&&document.getElementById('ri-name'))
@@ -1919,7 +1966,7 @@ function runSaveCurrentItem(){
 
 function runAddShop(){
   runSaveCurrentItem();
-  runItems.push({shopName:'',photo:'',gps:null,price:35,ice:{ts:0,tl:0,cc:0,cf:0},hasBonus:true,note:'',isNew:true,skipped:false,totalQty:0,totalBonus:0,totalMoney:0});
+  runItems.push({id:null,shopName:'',photo:'',gps:null,price:35,ice:{ts:0,tl:0,cc:0,cf:0},hasBonus:true,note:'',isNew:true,skipped:false,totalQty:0,totalBonus:0,totalMoney:0});
   dlvIdx=runItems.length-1;
   renderDlv();
   document.getElementById('dlvBody').scrollTop=0;
