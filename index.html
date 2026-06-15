@@ -1318,7 +1318,9 @@ function openLiveMap(){
     const color=p.skipped?'#ef4444':(p.i===(typeof dlvIdx!=='undefined'?dlvIdx:-1)?'#3b82f6':'#1a1a1a');
     const icon=L.divIcon({className:'',html:`<div style="background:${color};color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;border:2px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.35)">${p.i+1}</div>`,iconSize:[28,28],iconAnchor:[14,14]});
     const mk=L.marker([p.gps.lat,p.gps.lng],{icon}).addTo(lmMap)
-      .bindPopup(`<b>#${p.i+1} ${esc(p.name||'')}</b><br><a href="https://www.google.com/maps/dir/?api=1&destination=${p.gps.lat},${p.gps.lng}&travelmode=driving" target="_blank" style="color:#2563eb;font-weight:700">🧭 นำทาง Google</a>`);
+      .bindPopup(`<div style="min-width:150px;line-height:1.5"><b>#${p.i+1} ${esc(p.name||'')}</b><br>
+        <button onclick="navFromMarker(${p.i})" style="display:block;width:100%;margin:6px 0 4px;padding:7px;background:#16a34a;color:#fff;border:none;border-radius:8px;font-family:'Sarabun',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer">🚚 นำทางในแอป (เสียงไทย)</button>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=${p.gps.lat},${p.gps.lng}&travelmode=driving" target="_blank" style="display:block;text-align:center;color:#2563eb;font-weight:700;font-size:.8rem;padding:2px">🧭 นำทาง Google</a></div>`);
     lmMarkers.push(mk);
   });
   // fit bounds to all stops
@@ -1435,6 +1437,13 @@ async function fetchRoute(from,to){
   const j=await r.json();
   if(!j.routes||!j.routes.length)throw new Error('no route');
   return j.routes[0];
+}
+
+// แตะหมุดร้าน → เริ่มนำทางในแอปจากร้านนั้นไล่ไปจนจบสาย
+function navFromMarker(i){
+  if(lmMap)lmMap.closePopup();
+  const pt=lmPts.find(p=>p.i===i);
+  if(pt)startNav(pt);
 }
 
 async function startNav(target){
