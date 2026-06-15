@@ -1098,7 +1098,16 @@ async function uploadPhoto(id,b64){
 
 async function saveShop(shop){
   let photoUrl=null;
-  if(shop.photo&&shop.photo.startsWith('data:')){setSync('↑ อัพโหลดรูป...');photoUrl=await uploadPhoto(shop.id,shop.photo);const i=shops.findIndex(s=>s.id===shop.id);if(i>=0)shops[i].photo=photoUrl;}
+  if(shop.photo&&shop.photo.startsWith('data:')){
+    setSync('↑ อัพโหลดรูป...');
+    photoUrl=await uploadPhoto(shop.id,shop.photo);
+    if(!photoUrl){
+      // อัพขึ้น storage ไม่ได้ (เช่น ยังไม่ได้สร้าง bucket) → เก็บรูปไว้ในฐานข้อมูลแทน ไม่ให้รูปหาย
+      photoUrl=shop.photo;
+      showToast('⚠️ อัพรูปขึ้น storage ไม่ได้ — เก็บรูปไว้ในข้อมูลให้ก่อน (ควรสร้าง bucket shop-photos)');
+    }
+    const i=shops.findIndex(s=>s.id===shop.id);if(i>=0)shops[i].photo=photoUrl;
+  }
   return sbUpsert('shops',[{id:shop.id,num:shop.num,name:shop.name,price:shop.price,has_bonus:shop.hasBonus,ice:shop.ice,total_qty:shop.totalQty,total_bonus:shop.totalBonus,total_money:shop.totalMoney,gps:shop.gps||null,note:shop.note,time:shop.time,route_name:currentRoute,photo_url:photoUrl}]);
 }
 
