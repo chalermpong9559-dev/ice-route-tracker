@@ -617,6 +617,14 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
   </div>
   <div class="rs-brand"><span>🧊</span><span>สุรินทร์น้ำทิพย์</span></div>
   <div class="rs-date" id="rsDate"></div>
+  <div id="resumeBanner" style="display:none;width:100%;max-width:480px;background:#fff7ed;border:1.5px solid #fed7aa;border-radius:14px;padding:12px 14px;margin-bottom:14px">
+    <div style="font-weight:800;color:#d97706;font-size:.9rem;margin-bottom:4px">🚚 มีการวิ่งสายค้างอยู่</div>
+    <div id="resumeInfo" style="font-size:.8rem;color:#92400e;margin-bottom:10px"></div>
+    <div style="display:flex;gap:8px">
+      <button onclick="resumeRun()" style="flex:2;background:#16a34a;color:#fff;border:none;border-radius:10px;padding:10px;font-family:'Sarabun',sans-serif;font-weight:700;cursor:pointer">▶️ ทำต่อ</button>
+      <button onclick="discardRun()" style="flex:1;background:#fff;color:#dc2626;border:1.5px solid #fca5a5;border-radius:10px;padding:10px;font-family:'Sarabun',sans-serif;font-weight:700;cursor:pointer">ทิ้ง</button>
+    </div>
+  </div>
   <div class="rs-section">
     <div class="rs-header">
       <span class="rs-label">เลือกสายวันนี้</span>
@@ -899,7 +907,7 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
   </div>
   <div class="run-driver-row">
     <span>🚚 คนขับ</span>
-    <input class="run-driver-input" id="runDriver" placeholder="ชื่อคนขับวันนี้...">
+    <input class="run-driver-input" id="runDriver" placeholder="ชื่อคนขับวันนี้..." oninput="saveRunProgress()">
   </div>
   <div class="dlv-progress-wrap">
     <div class="dlv-progress-bar"><div class="dlv-progress-fill" id="dlvFill" style="width:0%"></div></div>
@@ -1020,6 +1028,8 @@ async function initRouteList(){
   renderRouteList(routes,cnt);
 }
 initRouteList();
+// เช็ควิ่งสายค้าง → โชว์ปุ่มทำต่อ (defer ให้รันหลัง init เสร็จ + DOM พร้อม)
+setTimeout(loadRunProgress,200);
 
 let editMode=false;
 
@@ -1709,8 +1719,8 @@ function lsSaveSheet(){
   item.totalBonus=bonus(item.totalQty,item.hasBonus);
   item.totalMoney=(item.totalQty-item.totalBonus)*item.price;
 }
-function lsDelivered(){lsSaveSheet();dlvDone.add(dlvIdx);dlvSkipped.delete(dlvIdx);showToast('✅ ส่งแล้ว');lsAdvance();}
-function lsSkip(){dlvSkipped.add(dlvIdx);dlvDone.delete(dlvIdx);showToast('ข้ามร้านนี้');lsAdvance();}
+function lsDelivered(){lsSaveSheet();dlvDone.add(dlvIdx);dlvSkipped.delete(dlvIdx);saveRunProgress();showToast('✅ ส่งแล้ว');lsAdvance();}
+function lsSkip(){dlvSkipped.add(dlvIdx);dlvDone.delete(dlvIdx);saveRunProgress();showToast('ข้ามร้านนี้');lsAdvance();}
 function lsAdvance(){
   let next=-1;
   for(let k=dlvIdx+1;k<runItems.length;k++){if(!dlvDone.has(k)&&!dlvSkipped.has(k)){next=k;break;}}
@@ -1735,7 +1745,7 @@ function lsGps(){
   navigator.geolocation.getCurrentPosition(pos=>{
     item.gps={lat:pos.coords.latitude,lng:pos.coords.longitude,acc:Math.round(pos.coords.accuracy)};
     if(btn){btn.textContent='📍 มีพิกัด 🔒';btn.classList.add('has');}
-    showToast('✅ จับพิกัดแล้ว');
+    showToast('✅ จับพิกัดแล้ว');saveRunProgress();
     if(item.id)fetch(`${SUPA_URL}/rest/v1/shops?id=eq.${item.id}`,{method:'PATCH',headers:H,body:JSON.stringify({gps:item.gps})});
   },()=>{if(btn)btn.textContent='📍 จับพิกัด';showToast('❌ จับพิกัดไม่ได้');},{enableHighAccuracy:true,timeout:10000});
 }
@@ -1746,7 +1756,7 @@ function lsPhoto(e){
     const item=runItems[dlvIdx];item.photo=ev.target.result;
     const txt=document.getElementById('lsPhotoTxt');if(txt)txt.textContent='📷 มีรูป 🔒';
     const b=document.getElementById('lsPhotoBtn');if(b){b.classList.add('has');b.onclick=()=>lsPhotoClick(true);}
-    showToast('✅ ถ่ายรูปแล้ว');
+    showToast('✅ ถ่ายรูปแล้ว');saveRunProgress();
     if(item.id){const url=await uploadPhoto(item.id,item.photo);const fin=url||item.photo;item.photo=fin;if(!url)showToast('⚠️ อัพ storage ไม่ได้ เก็บในข้อมูลแทน');fetch(`${SUPA_URL}/rest/v1/shops?id=eq.${item.id}`,{method:'PATCH',headers:H,body:JSON.stringify({photo_url:fin})});}
   };r.readAsDataURL(f);
 }
@@ -1978,6 +1988,48 @@ let dlvDone=new Set();   // ร้านที่กดส่งแล้ว
 let dlvView='card';      // 'card' = ทีละร้าน, 'list' = รายการทั้งสาย
 let runItems=[];  // working copy for current run
 
+// ── กันข้อมูลหายตอน reload: บันทึกความคืบหน้าลงเครื่อง ──
+const RUN_KEY='iceRunInProgress';
+function saveRunProgress(){
+  if(!runItems.length)return;
+  try{
+    // ตัดรูป base64 (ใหญ่/เกินโควต้า) — รูปร้านเดิมถูก sync ขึ้น cloud แล้ว
+    const items=runItems.map(it=>({...it,photo:(it.photo&&it.photo.startsWith('data:'))?'':it.photo}));
+    const snap={route:currentRoute,driver:document.getElementById('runDriver')?.value||'',items,dlvIdx,done:[...dlvDone],skipped:[...dlvSkipped],view:dlvView,date:today(),ts:Date.now()};
+    localStorage.setItem(RUN_KEY,JSON.stringify(snap));
+  }catch(e){/* localStorage เต็ม/ปิด — ข้าม */}
+}
+function clearRunProgress(){try{localStorage.removeItem(RUN_KEY);}catch(e){}}
+function loadRunProgress(){
+  let snap;try{snap=JSON.parse(localStorage.getItem(RUN_KEY));}catch(e){return;}
+  if(!snap||!snap.items||!snap.items.length)return;
+  const done=(snap.done||[]).length,skip=(snap.skipped||[]).length,total=snap.items.length;
+  if(done===0&&skip===0){clearRunProgress();return;}  // ยังไม่ได้ทำอะไร
+  const info=document.getElementById('resumeInfo');
+  if(info)info.textContent=`${snap.route} · ${snap.date} · ส่งแล้ว ${done} · ข้าม ${skip} · เหลือ ${total-done-skip}`;
+  const banner=document.getElementById('resumeBanner');if(banner)banner.style.display='block';
+}
+function resumeRun(){
+  let snap;try{snap=JSON.parse(localStorage.getItem(RUN_KEY));}catch(e){return;}
+  if(!snap)return;
+  currentRoute=snap.route;
+  runItems=snap.items||[];
+  dlvIdx=snap.dlvIdx||0;
+  dlvDone=new Set(snap.done||[]);
+  dlvSkipped=new Set(snap.skipped||[]);
+  dlvView=snap.view||'card';
+  document.getElementById('deliveryScreen').classList.add('open');
+  document.getElementById('deliveryScreen').style.display='flex';
+  const drv=document.getElementById('runDriver');if(drv)drv.value=snap.driver||'';
+  renderDlv();
+  const banner=document.getElementById('resumeBanner');if(banner)banner.style.display='none';
+}
+function discardRun(){
+  if(!confirm('ทิ้งการวิ่งสายที่ค้างอยู่?\nข้อมูลที่ยังไม่บันทึกจะหาย'))return;
+  clearRunProgress();
+  const banner=document.getElementById('resumeBanner');if(banner)banner.style.display='none';
+}
+
 function startDelivery(){
   if(!shops.length){alert('ยังไม่มีร้านในสายนี้');return;}
   dlvIdx=0; dlvSkipped=new Set(); dlvDone=new Set(); dlvView='card';
@@ -2007,6 +2059,7 @@ function closeDelivery(){
 }
 
 function renderDlv(){
+  saveRunProgress();
   const total=runItems.length;
   const skip=dlvSkipped.size;
   const handled=dlvDone.size+skip;
@@ -2154,7 +2207,7 @@ function runCaptureGPS(){
     const item=runItems[dlvIdx];
     item.gps={lat:pos.coords.latitude,lng:pos.coords.longitude,acc:Math.round(pos.coords.accuracy)};
     if(btn){btn.textContent='📍 มีพิกัด 🔒';btn.style.color='#16a34a';btn.style.background='#dcfce7';btn.style.borderColor='#86efac';}
-    showToast('✅ จับพิกัดแล้ว (±'+item.gps.acc+'ม.)');
+    showToast('✅ จับพิกัดแล้ว (±'+item.gps.acc+'ม.)');saveRunProgress();
     if(item.id)fetch(`${SUPA_URL}/rest/v1/shops?id=eq.${item.id}`,{method:'PATCH',headers:H,body:JSON.stringify({gps:item.gps})});
   },err=>{
     if(btn){btn.textContent='📍 จับพิกัด';}
@@ -2174,7 +2227,7 @@ function runCapturePhoto(e){
     const txt=document.getElementById('riPhotoTxt');if(txt)txt.textContent='📷 มีรูป 🔒';
     const pbtn=document.getElementById('riPhotoBtn');
     if(pbtn){pbtn.style.background='#dcfce7';pbtn.style.borderColor='#86efac';pbtn.style.color='#16a34a';pbtn.onclick=()=>runPhotoClick(true);}
-    showToast('✅ ถ่ายรูปแล้ว');
+    showToast('✅ ถ่ายรูปแล้ว');saveRunProgress();
     if(item.id){
       const url=await uploadPhoto(item.id,item.photo);
       const finalUrl=url||item.photo;
@@ -2259,6 +2312,7 @@ async function saveRun(){
   const st=document.getElementById('runSaveStatus');
   if(st)st.innerHTML='<span style="color:#16a34a;font-weight:700">✅ บันทึกแล้ว!</span>';
   if(btn){btn.textContent='✅ บันทึกแล้ว';btn.style.background='#16a34a';}
+  clearRunProgress();  // บันทึกขึ้น cloud แล้ว ลบสำเนาในเครื่อง
   showToast('✅ บันทึกยอดวิ่งสายแล้ว');
 }
 
