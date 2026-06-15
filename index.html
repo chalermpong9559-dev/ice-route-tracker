@@ -344,7 +344,9 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 .rpt-table td{padding:9px 10px;text-align:center;border-bottom:1px solid #f5f5f5;color:#333;}
 .rpt-table td:first-child{text-align:left;font-weight:600;}
 .rpt-table tr:last-child td{border-bottom:none;}
-.rpt-table tr:hover td{background:#fafafa;}
+.rpt-table tr.rpt-row{cursor:pointer;}
+.rpt-table tr.rpt-row:hover td{background:#f0f7ff;}
+.rpt-table tr.rpt-row:active td{background:#e0efff;}
 .rpt-table .total-row td{background:#1a1a1a;color:#fff;font-weight:700;}
 .rpt-table .money{color:#2563eb;font-weight:700;}
 .rpt-table .net-pos{color:#16a34a;font-weight:700;}
@@ -535,19 +537,16 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
   </div>
   <div class="sb-tabs">
     <button class="sb-tab active" id="sbTab0" onclick="switchSbTab(0)">🧊 สายน้ำแข็ง</button>
-    <button class="sb-tab" id="sbTab1" onclick="switchSbTab(1)">📊 บันทึกยอด</button>
+    <button class="sb-tab" id="sbTab1" onclick="switchSbTab(1)">📊 ยอด/รายงาน</button>
   </div>
   <div class="sb-panel active" id="sbPanel0">
     <div id="sbRouteList"><div style="padding:20px;text-align:center;color:#aaa;font-size:.82rem">กำลังโหลด...</div></div>
-    <div style="border-top:1px solid #f0f0f0;padding-top:10px;margin-top:4px;display:flex;flex-direction:column;gap:6px;">
-      <button onclick="openRunHist();closeSidebar();" style="width:100%;background:#f0f7ff;color:#2563eb;border:none;border-radius:12px;padding:11px;font-family:'Sarabun',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;text-align:left;">🚚 ประวัติวิ่งสาย</button>
-      <button onclick="showHistory();closeSidebar();" style="width:100%;background:#f5f5f5;color:#555;border:none;border-radius:12px;padding:11px;font-family:'Sarabun',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;text-align:left;">📋 ดูทุกสาย</button>
-    </div>
   </div>
   <div class="sb-panel" id="sbPanel1">
     <div style="padding:8px 0">
-      <button onclick="openDailyLog();closeSidebar();" style="width:100%;background:#1a1a1a;color:#fff;border:none;border-radius:14px;padding:15px;font-family:'Sarabun',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">📊 เปิดระบบบันทึกยอด</button>
-      <p style="font-size:.75rem;color:#aaa;text-align:center;margin-top:12px;line-height:1.6;">บันทึกยอดขายรายวันแต่ละสาย<br>ดูรายได้ ค่าใช้จ่าย ขาด/เกิน</p>
+      <button onclick="openReport();closeSidebar();" style="width:100%;background:#1a1a1a;color:#fff;border:none;border-radius:14px;padding:15px;font-family:'Sarabun',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">📊 ดูยอด / รายงานรายเดือน</button>
+      <button onclick="openDailyLog();closeSidebar();" style="width:100%;background:#f5f5f5;color:#555;border:none;border-radius:12px;padding:12px;font-family:'Sarabun',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;margin-top:8px;">✏️ กรอกยอด/ค่าใช้จ่าย เอง</button>
+      <p style="font-size:.75rem;color:#aaa;text-align:center;margin-top:12px;line-height:1.6;">ดูยอดถุง เงินที่เก็บได้ ค่าใช้จ่าย<br>แตะแต่ละวันเพื่อดูรายร้าน</p>
     </div>
   </div>
 </div>
@@ -586,7 +585,7 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 <div id="dailyLogScreen">
   <div class="dl-header">
     <button onclick="closeDailyLog()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:#555;">←</button>
-    <div class="dl-title">📊 บันทึกยอดประจำวัน</div>
+    <div class="dl-title">📊 ยอด / รายงาน</div>
   </div>
   <div class="dl-tabs">
     <button class="dl-tab active" id="dlTab0" onclick="switchDlTab(0)">✏️ บันทึก</button>
@@ -817,7 +816,7 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
     <button class="dlv-close" onclick="closeDelivery()">←</button>
     <div class="dlv-title" id="dlvTitle">วิ่งสาย</div>
     <span id="dlvSkippedBadge"></span>
-    <button onclick="openRunHist()" style="background:none;border:none;font-size:.78rem;color:#3b82f6;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;padding:4px 6px;">📋 ประวัติ</button>
+    <button onclick="openReport()" style="background:none;border:none;font-size:.78rem;color:#3b82f6;cursor:pointer;font-family:'Sarabun',sans-serif;font-weight:600;padding:4px 6px;">📊 ดูยอด</button>
   </div>
   <div class="run-driver-row">
     <span>🚚 คนขับ</span>
@@ -1890,6 +1889,15 @@ function closeDailyLog(){
   document.getElementById('dailyLogScreen').style.display='none';
 }
 
+// เปิดหน้ายอด/รายงาน ที่แท็บรายงานเลย (ทางเข้าหลักของการดูข้อมูล)
+function openReport(){
+  const s=document.getElementById('dailyLogScreen');
+  s.style.display='flex';
+  dlBuildIce();
+  dlLoadRoutes();
+  switchDlTab(1);
+}
+
 function switchDlTab(i){
   dlTabIdx=i;
   document.querySelectorAll('.dl-tab').forEach((t,idx)=>t.classList.toggle('active',idx===i));
@@ -2066,8 +2074,8 @@ async function loadReport(){
     const net=(r.actual_revenue||0)-exp;
     const d=new Date(r.date+'T00:00:00');
     const dateStr=d.toLocaleDateString('th-TH',{day:'numeric',month:'short',weekday:'short'});
-    return`<tr>
-      <td><div style="font-size:.72rem;color:#bbb">${dateStr}</div><div>${esc(r.route_name)}</div>${r.driver_name?`<div style="font-size:.68rem;color:#aaa">👤${esc(r.driver_name)}</div>`:''}</td>
+    return`<tr class="rpt-row" onclick="toggleReportDetail('rd${r.id}')">
+      <td><div style="font-size:.72rem;color:#bbb">${dateStr}</div><div style="color:#2563eb">▸ ${esc(r.route_name)}</div>${r.driver_name?`<div style="font-size:.68rem;color:#aaa">👤${esc(r.driver_name)}</div>`:''}</td>
       <td>${ts||'–'}</td>
       <td>${tl||'–'}</td>
       <td>${cc||'–'}</td>
@@ -2076,7 +2084,10 @@ async function loadReport(){
       <td class="money">฿${(r.actual_revenue||0).toLocaleString()}</td>
       <td style="color:#888">${exp?'฿'+exp.toLocaleString():'–'}</td>
       <td class="${net>=0?'net-pos':'net-neg'}">฿${net.toLocaleString()}</td>
-      <td><button class="dl-log-del" onclick="delDailyLog(${r.id})">🗑</button></td>
+      <td><button class="dl-log-del" onclick="event.stopPropagation();delDailyLog(${r.id})">🗑</button></td>
+    </tr>
+    <tr id="rd${r.id}" class="rpt-detail-row" data-date="${r.date}" data-route="${esc(r.route_name)}" style="display:none">
+      <td colspan="10" style="background:#fafafe;padding:0"><div class="rpt-detail-inner" style="padding:10px 12px">แตะเพื่อโหลด...</div></td>
     </tr>`;
   }).join('');
   list.innerHTML=`<div class="rpt-wrap"><table class="rpt-table">
@@ -2092,6 +2103,35 @@ async function loadReport(){
       <td>${tBags}</td><td>฿${tActual.toLocaleString()}</td><td>฿${tExp.toLocaleString()}</td><td>฿${tNet.toLocaleString()}</td><td></td>
     </tr></tfoot>
   </table></div>`;
+}
+
+// แตะแถววัน → กางดูรายร้านของวันนั้น (จาก run_items)
+async function toggleReportDetail(id){
+  const row=document.getElementById(id);
+  if(!row)return;
+  const open=row.style.display!=='none';
+  if(open){row.style.display='none';return;}
+  row.style.display='table-row';
+  const inner=row.querySelector('.rpt-detail-inner');
+  if(row.dataset.loaded==='1')return;
+  inner.textContent='กำลังโหลดรายร้าน...';
+  const date=row.dataset.date, route=row.dataset.route;
+  const sessions=await sbGet('run_sessions',`run_date=eq.${date}&route_name=eq.${encodeURIComponent(route)}&select=*,run_items(*)&order=created_at.desc`);
+  row.dataset.loaded='1';
+  const items=(sessions[0]&&sessions[0].run_items||[]).sort((a,b)=>a.seq-b.seq);
+  if(!items.length){
+    inner.innerHTML='<div style="color:#aaa;font-size:.78rem;text-align:center;padding:6px">ไม่มีรายละเอียดร้าน (วันนี้กรอกยอดเอง ไม่ได้วิ่งสายผ่านแอป)</div>';
+    return;
+  }
+  inner.innerHTML=`<div style="font-size:.7rem;font-weight:700;color:#888;margin-bottom:6px">🏪 รายร้าน ${items.filter(i=>!i.skipped).length} ร้าน</div>`+
+    items.map(it=>`<div class="rh-item${it.skipped?' skipped':''}" style="padding:7px 0">
+      <span class="rh-item-num">${it.seq}</span>
+      <div style="flex:1;min-width:0">
+        <div class="rh-item-name">${esc(it.shop_name)}${it.is_new?' <span style="font-size:.62rem;background:#fef3c7;color:#d97706;border-radius:4px;padding:1px 5px">ใหม่</span>':''}</div>
+        <div class="rh-item-detail">${ICE.filter(ic=>it.ice&&it.ice[ic.k]).map(ic=>`${ic.icon}${it.ice[ic.k]}`).join(' · ')}${it.note?' · '+esc(it.note):''}</div>
+      </div>
+      <div class="rh-item-money">${it.skipped?'ข้าม':'฿'+(it.total_money||0).toLocaleString()}</div>
+    </div>`).join('');
 }
 
 // ── Sidebar ──
