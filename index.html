@@ -485,6 +485,13 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 .lm-next-dist{font-size:.78rem;color:#3b82f6;font-weight:700;margin-top:1px;}
 .lm-next-nav{background:#1a1a1a;color:#fff;border:none;border-radius:10px;padding:9px 13px;font-family:'Sarabun',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;}
 .lm-recenter{position:absolute;right:12px;bottom:160px;z-index:1000;width:46px;height:46px;border-radius:50%;background:#fff;border:1px solid #e0e0e0;box-shadow:0 2px 10px rgba(0,0,0,.18);font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.lm-nav-start{background:#16a34a;color:#fff;border:none;border-radius:10px;padding:9px 13px;font-family:'Sarabun',sans-serif;font-size:.85rem;font-weight:800;cursor:pointer;white-space:nowrap;}
+.lm-nav-banner{position:absolute;top:60px;left:12px;right:12px;z-index:1001;background:#1e293b;color:#fff;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(0,0,0,.3);}
+.lm-nav-arrow{font-size:1.9rem;flex-shrink:0;line-height:1;}
+.lm-nav-text{flex:1;min-width:0;}
+.lm-nav-dist{font-size:1.4rem;font-weight:800;line-height:1.1;}
+.lm-nav-instr{font-size:.85rem;color:#cbd5e1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.lm-nav-stop{background:#ef4444;color:#fff;border:none;border-radius:10px;width:40px;height:40px;font-size:1rem;cursor:pointer;flex-shrink:0;}
 .lm-userdot{width:18px;height:18px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 2px rgba(37,99,235,.4);}
 .lm-userdot-pulse{position:absolute;top:50%;left:50%;width:18px;height:18px;transform:translate(-50%,-50%);background:rgba(37,99,235,.3);border-radius:50%;animation:lmpulse 1.8s ease-out infinite;}
 @keyframes lmpulse{0%{transform:translate(-50%,-50%) scale(1);opacity:.7}100%{transform:translate(-50%,-50%) scale(4);opacity:0}}
@@ -782,6 +789,15 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
     <div class="lm-title" id="lmTitle">แผนที่สด</div>
     <span class="lm-gps-badge" id="lmGpsBadge">📍 กำลังหาตำแหน่ง...</span>
   </div>
+  <!-- นำทางแถบบน (เหมือน Google Maps) -->
+  <div class="lm-nav-banner" id="lmNavBanner" style="display:none">
+    <div class="lm-nav-arrow" id="lmNavArrow">⬆️</div>
+    <div class="lm-nav-text">
+      <div class="lm-nav-dist" id="lmNavDist">–</div>
+      <div class="lm-nav-instr" id="lmNavInstr">กำลังคำนวณเส้นทาง...</div>
+    </div>
+    <button class="lm-nav-stop" onclick="stopNav()" title="หยุดนำทาง">⏹</button>
+  </div>
   <button class="lm-recenter" onclick="lmRecenter()">🎯</button>
   <div class="lm-next-card hidden" id="lmNextCard">
     <div class="lm-next-num" id="lmNextNum">1</div>
@@ -790,7 +806,10 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
       <div class="lm-next-name" id="lmNextName">–</div>
       <div class="lm-next-dist" id="lmNextDist">–</div>
     </div>
-    <button class="lm-next-nav" id="lmNextNav">🧭 นำทาง</button>
+    <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+      <button class="lm-nav-start" id="lmNavStart">▶️ นำทาง</button>
+      <button class="lm-next-nav" id="lmNextNav">Google</button>
+    </div>
   </div>
 </div>
 
@@ -1303,7 +1322,8 @@ function lmStartWatch(pts){
     if(!lmUserMarker){lmUserMarker=L.marker([lmUserPos.lat,lmUserPos.lng],{icon,zIndexOffset:1000}).addTo(lmMap);}
     else lmUserMarker.setLatLng([lmUserPos.lat,lmUserPos.lng]);
     if(lmFollow)lmMap.panTo([lmUserPos.lat,lmUserPos.lng],{animate:true});
-    lmUpdateNextCard(pts);
+    if(navActive)navTick();
+    else lmUpdateNextCard(pts);
   },err=>{
     badge.textContent='⚠️ เปิด GPS ไม่ได้';badge.classList.remove('on');
   },{enableHighAccuracy:true,maximumAge:2000,timeout:10000});
@@ -1329,6 +1349,7 @@ function lmUpdateNextCard(pts){
   if(lmUserPos){distEl.textContent='📍 ห่าง '+lmFmtDist(lmDist(lmUserPos,target.gps));}
   else distEl.textContent='รอตำแหน่ง GPS...';
   document.getElementById('lmNextNav').onclick=()=>navTo(target.gps.lat,target.gps.lng);
+  document.getElementById('lmNavStart').onclick=()=>startNav(target);
   // draw line user→target
   if(lmLine){lmMap.removeLayer(lmLine);lmLine=null;}
   if(lmUserPos){
@@ -1343,8 +1364,153 @@ function lmRecenter(){
 }
 
 function closeLiveMap(){
+  stopNav();
   if(lmWatchId!==null){navigator.geolocation.clearWatch(lmWatchId);lmWatchId=null;}
   document.getElementById('liveMapScreen').style.display='none';
+}
+
+// ── In-app Turn-by-turn Navigation (OSRM + Web Speech) ──
+let navActive=false,navTarget=null,navSteps=[],navStepIdx=0,navRouteLine=null,navRouteCoords=[],navArrived=false,navRerouteAt=0;
+
+function speak(text){
+  if(!('speechSynthesis' in window)||!text)return;
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='th-TH';u.rate=1;u.pitch=1;
+  const voices=speechSynthesis.getVoices();
+  const th=voices.find(v=>v.lang==='th-TH')||voices.find(v=>v.lang&&v.lang.toLowerCase().startsWith('th'));
+  if(th)u.voice=th;
+  speechSynthesis.speak(u);
+}
+// แปลง maneuver ของ OSRM → ประโยคภาษาไทย
+function navPhrase(st,withRoad){
+  const t=st.maneuver.type,mod=st.maneuver.modifier||'',road=st.name||'';
+  const turn={'left':'เลี้ยวซ้าย','right':'เลี้ยวขวา','slight left':'เบี่ยงซ้าย','slight right':'เบี่ยงขวา','sharp left':'เลี้ยวซ้ายหักศอก','sharp right':'เลี้ยวขวาหักศอก','straight':'ตรงไป','uturn':'กลับรถ'};
+  let base;
+  if(t==='depart')base='เริ่มออกเดินทาง ตรงไป';
+  else if(t==='arrive')base='ถึงจุดหมายแล้ว';
+  else if(t==='roundabout'||t==='rotary')base='เข้าวงเวียน';
+  else if(t==='merge')base='รวมเลน '+(turn[mod]||'');
+  else if(t==='end of road')base=turn[mod]||'เลี้ยว';
+  else base=turn[mod]||'ตรงไป';
+  if(withRoad&&road&&t!=='arrive')base+=' เข้าถนน '+road;
+  return base;
+}
+function navArrow(st){
+  const t=st.maneuver.type,mod=st.maneuver.modifier||'';
+  if(t==='arrive')return'🏁';
+  if(t==='roundabout'||t==='rotary')return'🔄';
+  return{'left':'⬅️','right':'➡️','slight left':'↖️','slight right':'↗️','sharp left':'⬅️','sharp right':'➡️','uturn':'⬇️','straight':'⬆️'}[mod]||'⬆️';
+}
+// ระยะจากจุด → เส้นทาง (min ถึง vertex; geometry หนาแน่นพอ)
+function navDistToRoute(p){
+  let min=Infinity;
+  for(const c of navRouteCoords){const d=lmDist(p,{lat:c[0],lng:c[1]});if(d<min)min=d;}
+  return min;
+}
+
+async function fetchRoute(from,to){
+  const url=`https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson&steps=true`;
+  const r=await fetch(url);
+  if(!r.ok)throw new Error('osrm '+r.status);
+  const j=await r.json();
+  if(!j.routes||!j.routes.length)throw new Error('no route');
+  return j.routes[0];
+}
+
+async function startNav(target){
+  if(!lmUserPos){showToast('รอจับตำแหน่ง GPS ก่อน');return;}
+  navTarget=target;navArrived=false;navStepIdx=0;navRerouteAt=0;
+  document.getElementById('lmNextCard').classList.add('hidden');
+  const banner=document.getElementById('lmNavBanner');
+  banner.style.display='flex';
+  document.getElementById('lmNavInstr').textContent='กำลังคำนวณเส้นทาง...';
+  document.getElementById('lmNavDist').textContent='';
+  document.getElementById('lmNavArrow').textContent='⏳';
+  navActive=true;lmFollow=true;
+  // ปลุกเสียง (ต้องอยู่ใน user gesture ของปุ่ม)
+  speak('เริ่มนำทาง');
+  try{
+    await navBuild(lmUserPos,target.gps);
+  }catch(e){
+    // fallback: เส้นตรง + เสียงบอกระยะ
+    navFallback();
+  }
+}
+
+async function navBuild(from,to){
+  const route=await fetchRoute(from,to);
+  navRouteCoords=route.geometry.coordinates.map(c=>[c[1],c[0]]); // [lat,lng]
+  navSteps=(route.legs[0].steps||[]).map(s=>({maneuver:s.maneuver,name:s.name,distance:s.distance,loc:{lat:s.maneuver.location[1],lng:s.maneuver.location[0]},farSaid:false,nearSaid:false}));
+  navStepIdx=0;
+  // วาดเส้นทางตามถนน
+  if(navRouteLine){lmMap.removeLayer(navRouteLine);}
+  if(lmLine){lmMap.removeLayer(lmLine);lmLine=null;}
+  navRouteLine=L.polyline(navRouteCoords,{color:'#2563eb',weight:6,opacity:.85}).addTo(lmMap);
+  // ประกาศก้าวแรกที่เป็นการเลี้ยว (ข้าม depart)
+  navTick(true);
+}
+
+function navFallback(){
+  navSteps=[];navRouteCoords=[];
+  if(navRouteLine){lmMap.removeLayer(navRouteLine);navRouteLine=null;}
+  navRouteLine=L.polyline([[lmUserPos.lat,lmUserPos.lng],[navTarget.gps.lat,navTarget.gps.lng]],{color:'#f59e0b',weight:5,opacity:.8,dashArray:'8,6'}).addTo(lmMap);
+  const d=lmDist(lmUserPos,navTarget.gps);
+  document.getElementById('lmNavArrow').textContent='🧭';
+  document.getElementById('lmNavDist').textContent=lmFmtDist(d);
+  document.getElementById('lmNavInstr').textContent='ออนไลน์เส้นทางไม่ได้ — มุ่งตรงไป '+(navTarget.name||'ร้าน');
+  speak('คำนวณเส้นทางไม่ได้ มุ่งตรงไปยังร้าน ระยะ '+Math.round(d)+' เมตร');
+}
+
+function navTick(first){
+  if(!navActive||!lmUserPos)return;
+  // ถึงร้านหรือยัง
+  const dDest=lmDist(lmUserPos,navTarget.gps);
+  if(dDest<35&&!navArrived){
+    navArrived=true;
+    document.getElementById('lmNavArrow').textContent='🏁';
+    document.getElementById('lmNavDist').textContent='ถึงแล้ว';
+    document.getElementById('lmNavInstr').textContent='ถึงร้าน '+(navTarget.name||'')+' แล้ว';
+    speak('ถึงร้าน '+(navTarget.name||'')+' แล้ว');
+    setTimeout(()=>{if(navArrived)stopNav();},4000);
+    return;
+  }
+  // โหมด fallback (ไม่มี steps) → อัปเดตระยะตรง
+  if(!navSteps.length){
+    document.getElementById('lmNavDist').textContent=lmFmtDist(dDest);
+    return;
+  }
+  // หลุดเส้นทาง > 50 ม. → คำนวณใหม่ (กันถี่เกิน ทุก 10 วิ)
+  const offRoute=navDistToRoute(lmUserPos);
+  if(offRoute>50&&Date.now()-navRerouteAt>10000){
+    navRerouteAt=Date.now();
+    document.getElementById('lmNavInstr').textContent='ออกนอกเส้นทาง — คำนวณใหม่...';
+    speak('กำลังคำนวณเส้นทางใหม่');
+    navBuild(lmUserPos,navTarget.gps).catch(()=>navFallback());
+    return;
+  }
+  // เลื่อน step ถ้าผ่านจุดเลี้ยวปัจจุบันไปแล้ว
+  while(navStepIdx<navSteps.length-1&&lmDist(lmUserPos,navSteps[navStepIdx].loc)<20){
+    navStepIdx++;
+  }
+  const st=navSteps[navStepIdx];
+  const dTurn=lmDist(lmUserPos,st.loc);
+  document.getElementById('lmNavArrow').textContent=navArrow(st);
+  document.getElementById('lmNavDist').textContent=lmFmtDist(dTurn);
+  document.getElementById('lmNavInstr').textContent=navPhrase(st,true);
+  // เสียง: ไกล (~180ม.) บอกเตรียมตัว / ใกล้ (~30ม.) สั่งเลี้ยว
+  if(st.maneuver.type!=='depart'){
+    if(dTurn<=200&&dTurn>60&&!st.farSaid){st.farSaid=true;speak('อีก '+Math.round(dTurn/10)*10+' เมตร '+navPhrase(st,true));}
+    if(dTurn<=45&&!st.nearSaid){st.nearSaid=true;speak(navPhrase(st,false));}
+  }else if(first){
+    document.getElementById('lmNavInstr').textContent='ตรงไปตามเส้นทาง';
+  }
+}
+
+function stopNav(){
+  navActive=false;navTarget=null;navSteps=[];navRouteCoords=[];navArrived=false;
+  if('speechSynthesis' in window)speechSynthesis.cancel();
+  if(navRouteLine){lmMap.removeLayer(navRouteLine);navRouteLine=null;}
+  const b=document.getElementById('lmNavBanner');if(b)b.style.display='none';
 }
 
 // ── Map ──
