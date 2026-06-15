@@ -2301,7 +2301,17 @@ async function saveRun(){
   if(!res.ok){const e=await res.json().catch(()=>({}));showToast('❌ '+(e.message||e.hint||res.status));if(btn)btn.disabled=false;return;}
   const [session]=await res.json();
   // 2. insert items
-  const items=runItems.map((it,i)=>({session_id:session.id,seq:i+1,shop_name:it.shopName,price:it.price,ice:it.ice,has_bonus:it.hasBonus,total_qty:it.totalQty,total_bonus:it.totalBonus,total_money:it.totalMoney,note:it.note,is_new:it.isNew,skipped:dlvSkipped.has(i)}));
+  const items=[];
+  for(let i=0;i<runItems.length;i++){
+    const it=runItems[i];
+    let photo_url=it.photo||'';
+    // รูปร้านใหม่ยังเป็น base64 → อัพขึ้น storage ตอนนี้ (ร้านเดิมอัพไปแล้วเป็น URL)
+    if(photo_url.startsWith('data:')){
+      const u=await uploadPhoto(`run${session.id}_${i+1}`,photo_url);
+      photo_url=u||photo_url;  // อัพไม่ได้ → เก็บ base64 กันหาย
+    }
+    items.push({session_id:session.id,seq:i+1,shop_name:it.shopName,price:it.price,ice:it.ice,has_bonus:it.hasBonus,total_qty:it.totalQty,total_bonus:it.totalBonus,total_money:it.totalMoney,note:it.note,is_new:it.isNew,skipped:dlvSkipped.has(i),photo_url});
+  }
   const res2=await fetch(`${SUPA_URL}/rest/v1/run_items`,{method:'POST',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify(items)});
   if(!res2.ok){const e=await res2.json().catch(()=>({}));showToast('❌ '+(e.message||e.hint||res2.status));if(btn)btn.disabled=false;return;}
   // 3. auto-save daily_log from run totals
@@ -2682,6 +2692,7 @@ async function toggleReportDetail(id){
   inner.innerHTML=`<div style="font-size:.7rem;font-weight:700;color:#888;margin-bottom:6px">🏪 รายร้าน ${items.filter(i=>!i.skipped).length} ร้าน</div>`+
     items.map(it=>`<div class="rh-item${it.skipped?' skipped':''}" style="padding:7px 0">
       <span class="rh-item-num">${it.seq}</span>
+      ${it.photo_url?`<img src="${esc(it.photo_url)}" onclick="viewPhotoUrl('${esc(it.photo_url)}','${esc(it.shop_name)}')" style="width:38px;height:38px;border-radius:8px;object-fit:cover;cursor:pointer;flex-shrink:0;border:1px solid #ebebeb">`:`<div style="width:38px;height:38px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">🏪</div>`}
       <div style="flex:1;min-width:0">
         <div class="rh-item-name">${esc(it.shop_name)}${it.is_new?' <span style="font-size:.62rem;background:#fef3c7;color:#d97706;border-radius:4px;padding:1px 5px">ใหม่</span>':''}</div>
         <div class="rh-item-detail">${ICE.filter(ic=>it.ice&&it.ice[ic.k]).map(ic=>`${ic.icon}${it.ice[ic.k]}`).join(' · ')}${it.note?' · '+esc(it.note):''}</div>
