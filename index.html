@@ -407,6 +407,26 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 .dlv-finish-stat .v{font-size:1.3rem;font-weight:800;}
 .dlv-finish-stat .l{font-size:.65rem;color:#aaa;margin-top:2px;}
 .dlv-skipped{font-size:.75rem;color:#f59e0b;background:#fffbeb;border-radius:8px;padding:4px 10px;display:inline-block;}
+/* view toggle */
+.dlv-view-toggle{display:flex;gap:6px;margin-top:10px;}
+.dlv-view-btn{flex:1;padding:8px;border:1.5px solid #e5e5e5;border-radius:10px;background:#fff;font-family:'Sarabun',sans-serif;font-size:.78rem;font-weight:700;color:#888;cursor:pointer;}
+.dlv-view-btn.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a;}
+/* run list (รายการทั้งสาย) */
+.run-list-item{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #ebebeb;border-radius:12px;padding:10px 12px;margin-bottom:8px;cursor:pointer;border-left-width:5px;}
+.run-list-item:active{background:#fafafa;}
+.run-list-item.done{border-left-color:#16a34a;background:#f0fdf4;}
+.run-list-item.skip{border-left-color:#ef4444;background:#fef2f2;opacity:.85;}
+.run-list-item.pending{border-left-color:#cbd5e1;}
+.run-list-num{font-size:.8rem;font-weight:800;color:#94a3b8;min-width:22px;text-align:center;}
+.run-list-thumb{width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid #ebebeb;}
+.run-list-thumb-empty{width:40px;height:40px;border-radius:8px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.run-list-info{flex:1;min-width:0;}
+.run-list-name{font-size:.92rem;font-weight:700;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.run-list-detail{font-size:.72rem;color:#94a3b8;margin-top:1px;}
+.run-list-status{font-size:.72rem;font-weight:800;padding:4px 10px;border-radius:20px;white-space:nowrap;}
+.run-list-status.done{background:#dcfce7;color:#16a34a;}
+.run-list-status.skip{background:#fee2e2;color:#dc2626;}
+.run-list-status.pending{background:#f1f5f9;color:#94a3b8;}
 
 /* ── Run Mode (editable delivery) ── */
 .run-card{background:#fff;border-radius:18px;box-shadow:0 2px 12px rgba(0,0,0,.07);padding:16px;margin-bottom:10px;}
@@ -844,6 +864,10 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
   <div class="dlv-progress-wrap">
     <div class="dlv-progress-bar"><div class="dlv-progress-fill" id="dlvFill" style="width:0%"></div></div>
     <div class="dlv-progress-label"><span id="dlvProgLabel">จุดที่ 1</span><span id="dlvProgCount"></span></div>
+    <div class="dlv-view-toggle">
+      <button class="dlv-view-btn active" id="dlvViewCard" onclick="setDlvView('card')">📝 ทีละร้าน</button>
+      <button class="dlv-view-btn" id="dlvViewList" onclick="setDlvView('list')">📋 รายการทั้งสาย</button>
+    </div>
   </div>
   <div class="dlv-body" id="dlvBody"></div>
   <div class="dlv-footer" id="dlvFooter"></div>
@@ -1791,11 +1815,13 @@ function openRouteFromHistory(routeName){
 
 // ── Run Mode (daily delivery recording) ──
 let dlvIdx=0, dlvSkipped=new Set();
+let dlvDone=new Set();   // ร้านที่กดส่งแล้ว
+let dlvView='card';      // 'card' = ทีละร้าน, 'list' = รายการทั้งสาย
 let runItems=[];  // working copy for current run
 
 function startDelivery(){
   if(!shops.length){alert('ยังไม่มีร้านในสายนี้');return;}
-  dlvIdx=0; dlvSkipped=new Set();
+  dlvIdx=0; dlvSkipped=new Set(); dlvDone=new Set(); dlvView='card';
   // deep-copy template shops as starting point
   runItems=shops.map(s=>({
     id:s.id,
@@ -1823,17 +1849,55 @@ function closeDelivery(){
 
 function renderDlv(){
   const total=runItems.length;
-  const done=dlvIdx;
-  const pct=total?Math.round(done/total*100):0;
+  const skip=dlvSkipped.size;
+  const handled=dlvDone.size+skip;
+  const pct=total?Math.round(handled/total*100):0;
   document.getElementById('dlvFill').style.width=pct+'%';
   document.getElementById('dlvTitle').textContent=currentRoute+' – วิ่งสาย';
+  document.getElementById('dlvSkippedBadge').innerHTML=skip?`<span class="dlv-skipped">ข้าม ${skip}</span>`:'';
+  document.getElementById('dlvViewCard').classList.toggle('active',dlvView==='card');
+  document.getElementById('dlvViewList').classList.toggle('active',dlvView==='list');
+  if(dlvView==='list'){
+    document.getElementById('dlvProgLabel').textContent='รายการทั้งสาย';
+    document.getElementById('dlvProgCount').textContent=`ส่ง ${dlvDone.size} · ข้าม ${skip} · เหลือ ${total-handled}`;
+    renderRunList();
+    return;
+  }
+  const done=dlvIdx;
   document.getElementById('dlvProgLabel').textContent=done>=total?'เสร็จแล้ว! 🎉':`จุดที่ ${done+1}`;
   document.getElementById('dlvProgCount').textContent=`${done}/${total} จุด`;
-  const skip=dlvSkipped.size;
-  document.getElementById('dlvSkippedBadge').innerHTML=skip?`<span class="dlv-skipped">ข้าม ${skip}</span>`:'';
   if(done>=total){renderDlvFinish();return;}
   renderRunCard();
 }
+
+function setDlvView(v){
+  if(dlvView===v)return;
+  dlvView=v;
+  if(v==='card'&&dlvIdx>=runItems.length)dlvIdx=Math.max(0,runItems.length-1);
+  renderDlv();
+  document.getElementById('dlvBody').scrollTop=0;
+}
+
+// รายการร้านเรียงลงมา — สถานะสี: ส่งแล้ว=เขียว, ข้าม=แดง, รอ=เทา
+function renderRunList(){
+  document.getElementById('dlvBody').innerHTML=runItems.map((it,i)=>{
+    const st=dlvSkipped.has(i)?'skip':(dlvDone.has(i)?'done':'pending');
+    const stTxt=st==='skip'?'ข้าม':(st==='done'?'ส่งแล้ว ✓':'รอ');
+    const detail=ICE.filter(ic=>it.ice&&it.ice[ic.k]).map(ic=>`${ic.icon}${it.ice[ic.k]}`).join(' ')||'—';
+    return`<div class="run-list-item ${st}" onclick="dlvGoTo(${i})">
+      <span class="run-list-num">${i+1}</span>
+      ${it.photo?`<img class="run-list-thumb" src="${esc(it.photo)}">`:`<div class="run-list-thumb-empty">🏪</div>`}
+      <div class="run-list-info">
+        <div class="run-list-name">${esc(it.shopName||'(ร้านใหม่)')}${it.isNew?' 🆕':''}</div>
+        <div class="run-list-detail">${detail} · ฿${(it.totalMoney||0).toLocaleString()}</div>
+      </div>
+      <span class="run-list-status ${st}">${stTxt}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('dlvFooter').innerHTML=`<button class="btn-run-confirm" style="width:100%" onclick="dlvFinishFromList()">✅ จบสาย / ดูสรุป</button>`;
+}
+function dlvGoTo(i){dlvView='card';dlvIdx=i;renderDlv();document.getElementById('dlvBody').scrollTop=0;}
+function dlvFinishFromList(){dlvView='card';dlvIdx=runItems.length;renderDlv();}
 
 function renderRunCard(){
   const item=runItems[dlvIdx];
@@ -2041,6 +2105,7 @@ async function saveRun(){
 
 function dlvNext(){
   runSaveCurrentItem();
+  dlvDone.add(dlvIdx);dlvSkipped.delete(dlvIdx);  // ส่งแล้ว → เขียว
   const nextIdx=dlvIdx+1;
   if(nextIdx>=runItems.length && dlvSkipped.size>0){renderDlvConfirm();return;}
   dlvIdx=Math.min(nextIdx,runItems.length);
@@ -2070,8 +2135,8 @@ function renderDlvConfirm(){
 
 function dlvConfirmFinish(){dlvIdx=runItems.length;renderDlv();}
 function dlvBackFromConfirm(){dlvIdx=Math.max(dlvIdx-1,0);renderDlv();document.getElementById('dlvBody').scrollTop=0;}
-function dlvPrev(){dlvIdx=Math.max(dlvIdx-1,0);dlvSkipped.delete(dlvIdx);renderDlv();document.getElementById('dlvBody').scrollTop=0;}
-function dlvSkip(){dlvSkipped.add(dlvIdx);dlvIdx=Math.min(dlvIdx+1,runItems.length);renderDlv();document.getElementById('dlvBody').scrollTop=0;}
+function dlvPrev(){dlvIdx=Math.max(dlvIdx-1,0);dlvSkipped.delete(dlvIdx);dlvDone.delete(dlvIdx);renderDlv();document.getElementById('dlvBody').scrollTop=0;}
+function dlvSkip(){dlvSkipped.add(dlvIdx);dlvDone.delete(dlvIdx);dlvIdx=Math.min(dlvIdx+1,runItems.length);renderDlv();document.getElementById('dlvBody').scrollTop=0;}
 
 // ── Run History ──
 function openRunHist(){
