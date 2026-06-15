@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>สุรินทร์น้ำทิพย์</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:#f5f5f5;color:#1a1a1a;font-family:'Sarabun',sans-serif;min-height:100vh;}
@@ -464,6 +466,27 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 .rh-item-money{font-size:.82rem;font-weight:700;white-space:nowrap;}
 .rh-month-label{font-size:.72rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin:12px 0 6px;}
 
+/* ── Live Map Screen ── */
+#liveMapScreen{position:fixed;inset:0;z-index:170;background:#e8e8e8;display:none;flex-direction:column;}
+#liveMap{flex:1;width:100%;}
+.lm-header{position:absolute;top:0;left:0;right:0;z-index:1000;background:linear-gradient(180deg,rgba(255,255,255,.97),rgba(255,255,255,.85));padding:12px 14px;display:flex;align-items:center;gap:10px;backdrop-filter:blur(4px);}
+.lm-back{background:#fff;border:1px solid #e0e0e0;border-radius:10px;font-size:1.1rem;color:#333;cursor:pointer;padding:7px 12px;line-height:1;box-shadow:0 1px 4px rgba(0,0,0,.1);}
+.lm-title{flex:1;font-size:.95rem;font-weight:800;color:#1a1a1a;}
+.lm-gps-badge{font-size:.7rem;font-weight:700;padding:4px 10px;border-radius:20px;background:#fef3c7;color:#d97706;white-space:nowrap;}
+.lm-gps-badge.on{background:#dcfce7;color:#16a34a;}
+.lm-next-card{position:absolute;left:12px;right:12px;bottom:88px;z-index:1000;background:#fff;border-radius:16px;padding:12px 14px;box-shadow:0 4px 20px rgba(0,0,0,.18);display:flex;align-items:center;gap:12px;}
+.lm-next-card.hidden{display:none;}
+.lm-next-num{width:40px;height:40px;border-radius:50%;background:#3b82f6;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;flex-shrink:0;}
+.lm-next-info{flex:1;min-width:0;}
+.lm-next-label{font-size:.65rem;color:#aaa;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.lm-next-name{font-size:1rem;font-weight:800;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lm-next-dist{font-size:.78rem;color:#3b82f6;font-weight:700;margin-top:1px;}
+.lm-next-nav{background:#1a1a1a;color:#fff;border:none;border-radius:10px;padding:9px 13px;font-family:'Sarabun',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.lm-recenter{position:absolute;right:12px;bottom:160px;z-index:1000;width:46px;height:46px;border-radius:50%;background:#fff;border:1px solid #e0e0e0;box-shadow:0 2px 10px rgba(0,0,0,.18);font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.lm-userdot{width:18px;height:18px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 2px rgba(37,99,235,.4);}
+.lm-userdot-pulse{position:absolute;top:50%;left:50%;width:18px;height:18px;transform:translate(-50%,-50%);background:rgba(37,99,235,.3);border-radius:50%;animation:lmpulse 1.8s ease-out infinite;}
+@keyframes lmpulse{0%{transform:translate(-50%,-50%) scale(1);opacity:.7}100%{transform:translate(-50%,-50%) scale(4);opacity:0}}
+
 /* ── Sidebar ── */
 #sidebarBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;opacity:0;pointer-events:none;transition:opacity .25s;}
 #sidebarBackdrop.open{opacity:1;pointer-events:auto;}
@@ -749,6 +772,26 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
   <div class="done-bar-inner">
     <button class="btn-done" id="btnDone" onclick="showReport()" disabled style="flex:1">🗺️ ดูMAP</button>
     <button id="btnDelivery" onclick="startDelivery()" disabled style="flex:1;background:#3b82f6;color:#fff;border:none;border-radius:12px;padding:14px;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;">🚚 วิ่งสาย</button>
+  </div>
+</div>
+
+<!-- Live Map Screen -->
+<div id="liveMapScreen">
+  <div id="liveMap"></div>
+  <div class="lm-header">
+    <button class="lm-back" onclick="closeLiveMap()">←</button>
+    <div class="lm-title" id="lmTitle">แผนที่สด</div>
+    <span class="lm-gps-badge" id="lmGpsBadge">📍 กำลังหาตำแหน่ง...</span>
+  </div>
+  <button class="lm-recenter" onclick="lmRecenter()">🎯</button>
+  <div class="lm-next-card hidden" id="lmNextCard">
+    <div class="lm-next-num" id="lmNextNum">1</div>
+    <div class="lm-next-info">
+      <div class="lm-next-label">ร้านถัดไป</div>
+      <div class="lm-next-name" id="lmNextName">–</div>
+      <div class="lm-next-dist" id="lmNextDist">–</div>
+    </div>
+    <button class="lm-next-nav" id="lmNextNav">🧭 นำทาง</button>
   </div>
 </div>
 
@@ -1200,6 +1243,111 @@ function updateStats(){
 
 function navTo(lat,lng){window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`,'_blank');}
 
+// ── Live Map (in-app, real-time position) ──
+let lmMap=null,lmUserMarker=null,lmLine=null,lmWatchId=null,lmMarkers=[],lmFollow=true,lmUserPos=null;
+
+function lmDist(a,b){ // haversine meters
+  const R=6371000,toR=x=>x*Math.PI/180;
+  const dLat=toR(b.lat-a.lat),dLng=toR(b.lng-a.lng);
+  const s=Math.sin(dLat/2)**2+Math.cos(toR(a.lat))*Math.cos(toR(b.lat))*Math.sin(dLng/2)**2;
+  return 2*R*Math.asin(Math.sqrt(s));
+}
+function lmFmtDist(m){return m<1000?Math.round(m)+' ม.':(m/1000).toFixed(m<10000?1:0)+' กม.';}
+
+function openLiveMap(){
+  // points come from runItems (run mode); fall back to shops
+  const src=(typeof runItems!=='undefined'&&runItems.length)?runItems:shops;
+  const pts=src.map((s,i)=>({i,name:s.shopName||s.name,gps:s.gps,skipped:typeof dlvSkipped!=='undefined'&&dlvSkipped.has(i)})).filter(p=>p.gps&&p.gps.lat);
+  if(!pts.length){showToast('ยังไม่มีร้านที่ปักหมุด GPS');return;}
+  document.getElementById('liveMapScreen').style.display='flex';
+  document.getElementById('lmTitle').textContent=(currentRoute||'แผนที่สด')+' · '+pts.length+' จุด';
+  lmFollow=true;
+  // init map once
+  if(!lmMap){
+    lmMap=L.map('liveMap',{zoomControl:false}).setView([pts[0].gps.lat,pts[0].gps.lng],15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'©OSM',maxZoom:19}).addTo(lmMap);
+    L.control.zoom({position:'bottomleft'}).addTo(lmMap);
+    lmMap.on('dragstart',()=>{lmFollow=false;});
+  }
+  // clear old shop markers
+  lmMarkers.forEach(m=>lmMap.removeLayer(m));lmMarkers=[];
+  if(lmLine){lmMap.removeLayer(lmLine);lmLine=null;}
+  // dashed route line connecting stops in order
+  if(pts.length>1){
+    lmMarkers.push(L.polyline(pts.map(p=>[p.gps.lat,p.gps.lng]),{color:'#1a1a1a',weight:2,opacity:.4,dashArray:'5,5'}).addTo(lmMap));
+  }
+  // numbered shop markers
+  pts.forEach(p=>{
+    const color=p.skipped?'#ef4444':(p.i===(typeof dlvIdx!=='undefined'?dlvIdx:-1)?'#3b82f6':'#1a1a1a');
+    const icon=L.divIcon({className:'',html:`<div style="background:${color};color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;border:2px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.35)">${p.i+1}</div>`,iconSize:[28,28],iconAnchor:[14,14]});
+    const mk=L.marker([p.gps.lat,p.gps.lng],{icon}).addTo(lmMap)
+      .bindPopup(`<b>#${p.i+1} ${esc(p.name||'')}</b><br><a href="https://www.google.com/maps/dir/?api=1&destination=${p.gps.lat},${p.gps.lng}&travelmode=driving" target="_blank" style="color:#2563eb;font-weight:700">🧭 นำทาง Google</a>`);
+    lmMarkers.push(mk);
+  });
+  // fit bounds to all stops
+  if(pts.length>1)lmMap.fitBounds(pts.map(p=>[p.gps.lat,p.gps.lng]),{padding:[50,50]});
+  setTimeout(()=>lmMap.invalidateSize(),100);
+  lmUpdateNextCard(pts);
+  lmStartWatch(pts);
+}
+
+function lmStartWatch(pts){
+  const badge=document.getElementById('lmGpsBadge');
+  if(!navigator.geolocation){badge.textContent='❌ อุปกรณ์ไม่รองรับ GPS';return;}
+  if(lmWatchId!==null)navigator.geolocation.clearWatch(lmWatchId);
+  lmWatchId=navigator.geolocation.watchPosition(pos=>{
+    lmUserPos={lat:pos.coords.latitude,lng:pos.coords.longitude};
+    badge.textContent='🟢 ตำแหน่งสด';badge.classList.add('on');
+    // user marker
+    const html=`<div class="lm-userdot-pulse"></div><div class="lm-userdot"></div>`;
+    const icon=L.divIcon({className:'',html,iconSize:[18,18],iconAnchor:[9,9]});
+    if(!lmUserMarker){lmUserMarker=L.marker([lmUserPos.lat,lmUserPos.lng],{icon,zIndexOffset:1000}).addTo(lmMap);}
+    else lmUserMarker.setLatLng([lmUserPos.lat,lmUserPos.lng]);
+    if(lmFollow)lmMap.panTo([lmUserPos.lat,lmUserPos.lng],{animate:true});
+    lmUpdateNextCard(pts);
+  },err=>{
+    badge.textContent='⚠️ เปิด GPS ไม่ได้';badge.classList.remove('on');
+  },{enableHighAccuracy:true,maximumAge:2000,timeout:10000});
+}
+
+function lmUpdateNextCard(pts){
+  const card=document.getElementById('lmNextCard');
+  // next = current stop if it has gps; else nearest non-skipped
+  let target=null;
+  const curIdx=typeof dlvIdx!=='undefined'?dlvIdx:-1;
+  const cur=pts.find(p=>p.i===curIdx&&!p.skipped);
+  if(cur)target=cur;
+  else if(lmUserPos){
+    const cand=pts.filter(p=>!p.skipped);
+    cand.forEach(p=>p._d=lmDist(lmUserPos,p.gps));
+    target=cand.sort((a,b)=>a._d-b._d)[0];
+  }else target=pts.find(p=>!p.skipped)||pts[0];
+  if(!target){card.classList.add('hidden');return;}
+  card.classList.remove('hidden');
+  document.getElementById('lmNextNum').textContent=target.i+1;
+  document.getElementById('lmNextName').textContent=target.name||'ร้าน';
+  const distEl=document.getElementById('lmNextDist');
+  if(lmUserPos){distEl.textContent='📍 ห่าง '+lmFmtDist(lmDist(lmUserPos,target.gps));}
+  else distEl.textContent='รอตำแหน่ง GPS...';
+  document.getElementById('lmNextNav').onclick=()=>navTo(target.gps.lat,target.gps.lng);
+  // draw line user→target
+  if(lmLine){lmMap.removeLayer(lmLine);lmLine=null;}
+  if(lmUserPos){
+    lmLine=L.polyline([[lmUserPos.lat,lmUserPos.lng],[target.gps.lat,target.gps.lng]],{color:'#3b82f6',weight:4,opacity:.8}).addTo(lmMap);
+  }
+}
+
+function lmRecenter(){
+  lmFollow=true;
+  if(lmUserPos)lmMap.setView([lmUserPos.lat,lmUserPos.lng],16,{animate:true});
+  else showToast('ยังไม่ได้ตำแหน่ง GPS');
+}
+
+function closeLiveMap(){
+  if(lmWatchId!==null){navigator.geolocation.clearWatch(lmWatchId);lmWatchId=null;}
+  document.getElementById('liveMapScreen').style.display='none';
+}
+
 // ── Map ──
 function buildOSMEmbed(){
   const wg=shops.filter(s=>s.gps);if(!wg.length)return null;
@@ -1507,7 +1655,10 @@ function renderRunCard(){
     </div>`;
   runCalc();
   document.getElementById('dlvFooter').innerHTML=`
-    <button class="btn-run-addshop" onclick="runAddShop()">+ เพิ่มร้านใหม่ที่ไม่อยู่ในสาย</button>
+    <div class="dlv-row2">
+      <button class="btn-run-addshop" style="flex:1" onclick="runAddShop()">+ เพิ่มร้าน</button>
+      <button class="btn-run-addshop" style="flex:1;background:#eef2ff;color:#4f46e5;border-color:#c7d2fe" onclick="openLiveMap()">🗺️ แผนที่สด</button>
+    </div>
     <div class="dlv-row2">
       ${dlvIdx>0?`<button class="btn-run-prev" onclick="dlvPrev()">← ย้อน</button>`:''}
       <button class="btn-run-skip" onclick="dlvSkip()">ข้าม</button>
