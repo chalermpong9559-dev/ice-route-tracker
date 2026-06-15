@@ -513,6 +513,38 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
 .lm-nav-instr{font-size:.85rem;color:#cbd5e1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
 .lm-nav-stop{background:#ef4444;color:#fff;border:none;border-radius:10px;width:40px;height:40px;font-size:1rem;cursor:pointer;flex-shrink:0;}
 .lm-userdot{width:18px;height:18px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 2px rgba(37,99,235,.4);}
+/* recording bottom sheet on live map */
+.lm-sheet{position:absolute;left:0;right:0;bottom:0;z-index:1002;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -4px 24px rgba(0,0,0,.2);transition:transform .28s cubic-bezier(.4,0,.2,1);max-height:78%;display:flex;flex-direction:column;}
+.lm-sheet.collapsed{transform:translateY(calc(100% - 56px));}
+.lm-sheet-handle{padding:8px 16px 10px;cursor:pointer;flex-shrink:0;text-align:center;}
+.lm-sheet-grip{width:40px;height:4px;background:#d1d5db;border-radius:99px;margin:2px auto 8px;}
+.lm-sheet-handle-row{display:flex;align-items:center;gap:8px;justify-content:center;font-weight:800;font-size:.92rem;color:#1a1a1a;}
+.lm-sheet-body{overflow-y:auto;padding:0 16px 16px;}
+.ls-name{font-size:1.15rem;font-weight:800;color:#1a1a1a;}
+.ls-name-input{width:100%;border:1.5px solid #3b82f6;border-radius:10px;padding:8px 12px;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;outline:none;}
+.ls-row{display:flex;gap:8px;margin:10px 0;}
+.ls-qbtn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;border-radius:10px;padding:9px;font-family:'Sarabun',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;border:1.5px solid #e5e5e5;background:#f5f5f5;color:#555;}
+.ls-qbtn.has{background:#dcfce7;border-color:#86efac;color:#16a34a;}
+.ls-ice-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f5f5f5;}
+.ls-ice-row:last-child{border-bottom:none;}
+.ls-ice-icon{font-size:1.1rem;width:22px;text-align:center;}
+.ls-ice-name{flex:1;font-size:.86rem;font-weight:600;}
+.ls-step{display:flex;align-items:center;gap:6px;}
+.ls-step button{width:34px;height:34px;border:1.5px solid #e5e5e5;background:#fff;border-radius:9px;font-size:1.1rem;font-weight:700;cursor:pointer;color:#1a1a1a;}
+.ls-step input{width:48px;border:1.5px solid #e5e5e5;border-radius:9px;padding:7px 0;text-align:center;font-family:'Sarabun',sans-serif;font-size:1rem;font-weight:700;outline:none;-moz-appearance:textfield;}
+.ls-step input::-webkit-outer-spin-button,.ls-step input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.ls-bottom{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap;}
+.ls-price{display:flex;align-items:center;gap:5px;background:#f5f5f5;border-radius:10px;padding:6px 10px;font-size:.78rem;color:#888;}
+.ls-price input{width:46px;border:none;background:transparent;font-family:'Sarabun',sans-serif;font-size:.95rem;font-weight:700;text-align:center;outline:none;-moz-appearance:textfield;}
+.ls-price input::-webkit-outer-spin-button,.ls-price input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.ls-bonus{background:#f5f5f5;border-radius:10px;padding:6px 10px;font-size:.8rem;font-weight:700;cursor:pointer;}
+.ls-bonus.on{background:#dcfce7;color:#16a34a;}
+.ls-money{display:flex;align-items:center;justify-content:space-between;background:#1a1a1a;color:#fff;border-radius:12px;padding:10px 14px;margin-top:10px;}
+.ls-money .v{font-size:1.2rem;font-weight:800;}
+.ls-note{width:100%;border:1.5px solid #e5e5e5;border-radius:10px;padding:8px 12px;font-family:'Sarabun',sans-serif;font-size:.85rem;outline:none;margin-top:10px;}
+.ls-actions{display:flex;gap:8px;margin-top:12px;}
+.ls-skip{flex:1;background:#fee2e2;color:#dc2626;border:1.5px solid #fca5a5;border-radius:12px;padding:13px;font-family:'Sarabun',sans-serif;font-size:.9rem;font-weight:800;cursor:pointer;}
+.ls-done{flex:2;background:#16a34a;color:#fff;border:none;border-radius:12px;padding:13px;font-family:'Sarabun',sans-serif;font-size:.95rem;font-weight:800;cursor:pointer;}
 .lm-userdot-pulse{position:absolute;top:50%;left:50%;width:18px;height:18px;transform:translate(-50%,-50%);background:rgba(37,99,235,.3);border-radius:50%;animation:lmpulse 1.8s ease-out infinite;}
 @keyframes lmpulse{0%{transform:translate(-50%,-50%) scale(1);opacity:.7}100%{transform:translate(-50%,-50%) scale(4);opacity:0}}
 
@@ -819,6 +851,14 @@ header{background:#fff;border-bottom:1px solid #ebebeb;padding:14px 20px;display
     <button class="lm-nav-stop" onclick="stopNav()" title="หยุดนำทาง">⏹</button>
   </div>
   <button class="lm-recenter" onclick="lmRecenter()">🎯</button>
+  <!-- บันทึกร้านปัจจุบัน (เลื่อนขึ้นจากล่าง) -->
+  <div class="lm-sheet collapsed" id="lmSheet" style="display:none">
+    <div class="lm-sheet-handle" onclick="lsToggleSheet()">
+      <div class="lm-sheet-grip"></div>
+      <div class="lm-sheet-handle-row"><span id="lsHandleText">📝 บันทึกร้านนี้</span></div>
+    </div>
+    <div class="lm-sheet-body" id="lsBody"></div>
+  </div>
   <div class="lm-next-card hidden" id="lmNextCard">
     <div class="lm-next-num" id="lmNextNum">1</div>
     <div class="lm-next-info">
@@ -1361,6 +1401,13 @@ function openLiveMap(){
   setTimeout(()=>lmMap.invalidateSize(),100);
   lmUpdateNextCard(pts);
   lmStartWatch(pts);
+  // เปิด sheet บันทึกร้านปัจจุบัน (ร้านแรกที่ยังไม่ทำ)
+  if(runItems.length){
+    const fu=runItems.findIndex((_,i)=>!dlvDone.has(i)&&!dlvSkipped.has(i));
+    if(fu>=0)dlvIdx=fu;
+    document.getElementById('lmSheet').classList.add('collapsed');
+    lsRenderSheet();
+  }else{document.getElementById('lmSheet').style.display='none';}
 }
 
 function lmStartWatch(pts){
@@ -1423,6 +1470,9 @@ function closeLiveMap(){
   stopNav();
   if(lmWatchId!==null){navigator.geolocation.clearWatch(lmWatchId);lmWatchId=null;}
   document.getElementById('liveMapScreen').style.display='none';
+  document.getElementById('lmSheet').classList.add('collapsed');
+  // ซิงค์สถานะกลับหน้าวิ่งสาย (stepper/รายการ)
+  if(runItems.length&&document.getElementById('deliveryScreen').classList.contains('open'))renderDlv();
 }
 
 // ── In-app Turn-by-turn Navigation (OSRM + Web Speech) ──
@@ -1489,6 +1539,7 @@ async function startNav(target){
   if(!navQueue.length)navQueue=[target];
   navQIdx=0;target=navQueue[0];
   navTarget=target;navArrived=false;navStepIdx=0;navRerouteAt=0;
+  if(typeof target.i==='number'&&runItems.length){dlvIdx=target.i;lsRenderSheet();}
   document.getElementById('lmNextCard').classList.add('hidden');
   const banner=document.getElementById('lmNavBanner');
   banner.style.display='flex';
@@ -1538,9 +1589,15 @@ function navTick(first){
     navArrived=true;
     document.getElementById('lmNavArrow').textContent='🏁';
     document.getElementById('lmNavDist').textContent='ถึงแล้ว';
+    // โหมดวิ่งสาย: ถึงร้านแล้วเปิด sheet ให้บันทึก (ไปต่อเมื่อกดส่งแล้ว/ข้าม)
+    if(runItems.length){
+      document.getElementById('lmNavInstr').textContent='ถึง '+(navTarget.name||'')+' แล้ว — บันทึกแล้วกด ส่งแล้ว/ข้าม';
+      speak('ถึงร้าน '+(navTarget.name||'')+' แล้ว');
+      document.getElementById('lmSheet').classList.remove('collapsed');
+      return;
+    }
     const more=navQIdx<navQueue.length-1;
     if(more){
-      // ไปต่อร้านถัดไปอัตโนมัติ
       const nextStop=navQueue[navQIdx+1];
       document.getElementById('lmNavInstr').textContent='ถึง '+(navTarget.name||'')+' แล้ว → ไปต่อ '+(nextStop.name||'');
       speak('ถึงร้าน '+(navTarget.name||'')+' แล้ว ไปต่อร้านถัดไป '+(nextStop.name||''));
@@ -1590,6 +1647,108 @@ function stopNav(){
   if('speechSynthesis' in window)speechSynthesis.cancel();
   if(navRouteLine){lmMap.removeLayer(navRouteLine);navRouteLine=null;}
   const b=document.getElementById('lmNavBanner');if(b)b.style.display='none';
+}
+
+// ── Recording bottom sheet on live map ──
+function lsToggleSheet(){document.getElementById('lmSheet').classList.toggle('collapsed');}
+
+function lsRenderSheet(){
+  const sheet=document.getElementById('lmSheet');
+  if(!runItems.length){sheet.style.display='none';return;}
+  sheet.style.display='flex';
+  if(dlvIdx>=runItems.length)dlvIdx=runItems.length-1;
+  const item=runItems[dlvIdx];
+  document.getElementById('lsHandleText').textContent=`📝 จุดที่ ${dlvIdx+1}/${runItems.length} · ${item.shopName||'ร้านใหม่'}`;
+  const iceRows=ICE.map(ic=>`
+    <div class="ls-ice-row">
+      <span class="ls-ice-icon">${ic.icon}</span>
+      <span class="ls-ice-name">${ic.label}</span>
+      <div class="ls-step">
+        <button onclick="lsStep('${ic.k}',-1)">−</button>
+        <input type="number" id="ls-${ic.k}" value="${item.ice[ic.k]||0}" min="0" oninput="lsCalc()" onfocus="this.select()">
+        <button onclick="lsStep('${ic.k}',1)">+</button>
+      </div>
+    </div>`).join('');
+  document.getElementById('lsBody').innerHTML=`
+    ${item.isNew?`<input class="ls-name-input" id="ls-name" placeholder="ชื่อร้านใหม่..." value="${esc(item.shopName)}">`:`<div class="ls-name">${esc(item.shopName||'')}</div>`}
+    <input type="file" id="lsPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="lsPhoto(event)">
+    <div class="ls-row">
+      <button class="ls-qbtn ${item.photo?'has':''}" id="lsPhotoBtn" onclick="lsPhotoClick(${item.photo?'true':'false'})"><span id="lsPhotoTxt">📷 ${item.photo?'มีรูป 🔒':'ถ่ายรูป'}</span></button>
+      <button class="ls-qbtn ${item.gps?'has':''}" id="lsGpsBtn" onclick="lsGps()">📍 ${item.gps?'มีพิกัด 🔒':'จับพิกัด'}</button>
+    </div>
+    ${iceRows}
+    <div class="ls-bottom">
+      <div class="ls-price">฿/ถุง <input type="number" id="ls-price" value="${item.price}" min="1" oninput="lsCalc()"></div>
+      <div class="ls-bonus ${item.hasBonus?'on':''}" id="ls-bonus" onclick="lsToggleBonus()">🎁 แถม ${item.hasBonus?'เปิด':'ปิด'}</div>
+    </div>
+    <div class="ls-money"><span>ยอดรวม</span><span class="v" id="lsTotal">฿0</span></div>
+    <input class="ls-note" id="ls-note" placeholder="หมายเหตุ..." value="${esc(item.note||'')}">
+    <div class="ls-actions">
+      <button class="ls-skip" onclick="lsSkip()">ข้าม</button>
+      <button class="ls-done" onclick="lsDelivered()">ส่งแล้ว ✓ ต่อไป</button>
+    </div>`;
+  lsCalc();
+}
+function lsCalc(){
+  const price=parseInt(document.getElementById('ls-price')?.value)||0;
+  const bon=document.getElementById('ls-bonus')?.classList.contains('on')||false;
+  let qty=0;ICE.forEach(ic=>{qty+=parseInt(document.getElementById('ls-'+ic.k)?.value)||0;});
+  const b=bonus(qty,bon);
+  const el=document.getElementById('lsTotal');if(el)el.textContent='฿'+((qty-b)*price).toLocaleString();
+}
+function lsToggleBonus(){const c=document.getElementById('ls-bonus');if(!c)return;c.classList.toggle('on');c.textContent='🎁 แถม '+(c.classList.contains('on')?'เปิด':'ปิด');lsCalc();}
+function lsStep(k,d){const inp=document.getElementById('ls-'+k);if(!inp)return;inp.value=Math.max(0,(parseInt(inp.value)||0)+d);lsCalc();}
+function lsSaveSheet(){
+  const item=runItems[dlvIdx];if(!item)return;
+  if(item.isNew&&document.getElementById('ls-name'))item.shopName=document.getElementById('ls-name').value.trim()||'ร้านใหม่';
+  item.price=parseInt(document.getElementById('ls-price')?.value)||item.price;
+  item.hasBonus=document.getElementById('ls-bonus')?.classList.contains('on')??item.hasBonus;
+  item.note=document.getElementById('ls-note')?.value||'';
+  ICE.forEach(ic=>{item.ice[ic.k]=parseInt(document.getElementById('ls-'+ic.k)?.value)||0;});
+  item.totalQty=ICE.reduce((a,ic)=>a+(item.ice[ic.k]||0),0);
+  item.totalBonus=bonus(item.totalQty,item.hasBonus);
+  item.totalMoney=(item.totalQty-item.totalBonus)*item.price;
+}
+function lsDelivered(){lsSaveSheet();dlvDone.add(dlvIdx);dlvSkipped.delete(dlvIdx);showToast('✅ ส่งแล้ว');lsAdvance();}
+function lsSkip(){dlvSkipped.add(dlvIdx);dlvDone.delete(dlvIdx);showToast('ข้ามร้านนี้');lsAdvance();}
+function lsAdvance(){
+  let next=-1;
+  for(let k=dlvIdx+1;k<runItems.length;k++){if(!dlvDone.has(k)&&!dlvSkipped.has(k)){next=k;break;}}
+  if(next<0)for(let k=0;k<runItems.length;k++){if(!dlvDone.has(k)&&!dlvSkipped.has(k)){next=k;break;}}
+  if(next<0){
+    document.getElementById('lsHandleText').textContent='🎉 ครบทุกร้านแล้ว';
+    document.getElementById('lsBody').innerHTML='<div style="text-align:center;padding:24px 12px;color:#16a34a;font-weight:800">🎉 ครบทุกร้านแล้ว!<br><button onclick="closeLiveMap();dlvFinishFromList()" style="margin-top:14px;background:#1a1a1a;color:#fff;border:none;border-radius:12px;padding:12px 22px;font-family:Sarabun,sans-serif;font-size:.9rem;font-weight:700;cursor:pointer">💾 บันทึกยอด / ดูสรุป</button></div>';
+    document.getElementById('lmSheet').classList.remove('collapsed');
+    if(navActive)stopNav();
+    return;
+  }
+  dlvIdx=next;
+  lsRenderSheet();
+  const pt=lmPts.find(p=>p.i===dlvIdx);
+  if(pt&&navActive){navTarget=pt;navArrived=false;navStepIdx=0;document.getElementById('lmNavBanner').style.display='flex';navBuild(lmUserPos,pt.gps).catch(()=>navFallback());}
+}
+function lsGps(){
+  if(!navigator.geolocation){showToast('อุปกรณ์ไม่รองรับ GPS');return;}
+  const item=runItems[dlvIdx];
+  if(item.gps&&!confirm('มีพิกัดอยู่แล้ว 🔒\nจับใหม่ทับไหม?'))return;
+  const btn=document.getElementById('lsGpsBtn');if(btn)btn.textContent='📍 กำลังจับ...';
+  navigator.geolocation.getCurrentPosition(pos=>{
+    item.gps={lat:pos.coords.latitude,lng:pos.coords.longitude,acc:Math.round(pos.coords.accuracy)};
+    if(btn){btn.textContent='📍 มีพิกัด 🔒';btn.classList.add('has');}
+    showToast('✅ จับพิกัดแล้ว');
+    if(item.id)fetch(`${SUPA_URL}/rest/v1/shops?id=eq.${item.id}`,{method:'PATCH',headers:H,body:JSON.stringify({gps:item.gps})});
+  },()=>{if(btn)btn.textContent='📍 จับพิกัด';showToast('❌ จับพิกัดไม่ได้');},{enableHighAccuracy:true,timeout:10000});
+}
+function lsPhotoClick(locked){if(locked&&!confirm('มีรูปอยู่แล้ว 🔒\nถ่ายใหม่ทับไหม?'))return;document.getElementById('lsPhotoInput').click();}
+function lsPhoto(e){
+  const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=async ev=>{
+    const item=runItems[dlvIdx];item.photo=ev.target.result;
+    const txt=document.getElementById('lsPhotoTxt');if(txt)txt.textContent='📷 มีรูป 🔒';
+    const b=document.getElementById('lsPhotoBtn');if(b){b.classList.add('has');b.onclick=()=>lsPhotoClick(true);}
+    showToast('✅ ถ่ายรูปแล้ว');
+    if(item.id){const url=await uploadPhoto(item.id,item.photo);const fin=url||item.photo;item.photo=fin;if(!url)showToast('⚠️ อัพ storage ไม่ได้ เก็บในข้อมูลแทน');fetch(`${SUPA_URL}/rest/v1/shops?id=eq.${item.id}`,{method:'PATCH',headers:H,body:JSON.stringify({photo_url:fin})});}
+  };r.readAsDataURL(f);
 }
 
 // ── Map ──
