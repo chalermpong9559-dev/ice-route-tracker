@@ -1,0 +1,23 @@
+name: Supabase keep-alive
+
+# ยิง request ไปที่ Supabase ทุกวัน กันโปรเจกต์โดน auto-pause (free tier pause เมื่อว่าง ~7 วัน)
+on:
+  schedule:
+    - cron: '0 6 * * *'   # ทุกวัน 06:00 UTC (~13:00 เวลาไทย)
+  workflow_dispatch:        # กดรันเองได้จากแท็บ Actions
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST
+        run: |
+          SUPA_URL="https://nosawlvjtaiumhnbjfsk.supabase.co"
+          SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vc2F3bHZqdGFpdW1obmJqZnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MjU3MjEsImV4cCI6MjA5NTQwMTcyMX0.2nr-zdDTP9PqmvWflsfd5RA_8IsUm61mJxlTHDIJhKU"
+          code=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: $SUPA_KEY" \
+            -H "Authorization: Bearer $SUPA_KEY" \
+            "$SUPA_URL/rest/v1/routes?select=id&limit=1")
+          echo "HTTP $code"
+          # 200 = ปกติ; ถ้าโปรเจกต์ pause อยู่ การยิงก็ถือเป็น activity ช่วยให้ไม่ pause ต่อ
+          if [ "$code" != "200" ]; then echo "Warning: unexpected status $code"; fi
